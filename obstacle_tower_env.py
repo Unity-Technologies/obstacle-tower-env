@@ -5,7 +5,7 @@ import os
 
 
 class ObstacleTowerEnv(UnityEnv):
-    def __init__(self, environment_filename: str, docker_training=True, worker_id=0, use_visual=True):
+    def __init__(self, environment_filename: str, docker_training=True, worker_id=0, use_visual=True, multiagent=False):
         """
         WARNING: Copied from gym-unity / UnityEnv wholesale.  Duplicates initialization logic since 
         gym-unity doesn't support docker training.  Rather than updating this, it would be better to fix 
