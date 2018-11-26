@@ -2,7 +2,11 @@ from gym_unity.envs import UnityEnv
 from mlagents.envs import UnityEnvironment
 from gym import spaces
 import os
+import numpy as np
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("mlagents.envs")
 
 class ObstacleTowerEnv(UnityEnv):
     def __init__(self, environment_filename: str, docker_training=True, worker_id=0, use_visual=True, multiagent=False):
