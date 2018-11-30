@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mlagents.envs")
 
 class ObstacleTowerEnv(UnityEnv):
-    def __init__(self, environment_filename: str, docker_training=True, worker_id=0, use_visual=True, multiagent=False):
+    def __init__(self, environment_filename=None, docker_training=True, worker_id=0, use_visual=True, multiagent=False):
         """
         WARNING: Copied from gym-unity / UnityEnv wholesale.  Duplicates initialization logic since 
         gym-unity doesn't support docker training.  Rather than updating this, it would be better to fix 
@@ -21,6 +21,9 @@ class ObstacleTowerEnv(UnityEnv):
         :param use_visual: Whether to use visual observation or vector observation.
         :param multiagent: Whether to run in multi-agent mode (lists of obs, reward, done).
         """
+        if os.getenv('CROWDAI_IS_GRADING', False):
+            environment_filename = None
+
         self._env = UnityEnvironment(environment_filename, worker_id, docker_training=docker_training)
         self.name = self._env.academy_name
         self.visual_obs = None
