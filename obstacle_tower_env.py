@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mlagents.envs")
 
 class ObstacleTowerEnv(UnityEnv):
-    def __init__(self, environment_filename=None, docker_training=True, worker_id=0, use_visual=True, multiagent=False):
+    def __init__(self, environment_filename=None, docker_training=False, worker_id=0, use_visual=True, multiagent=False):
         """
         WARNING: Copied from gym-unity / UnityEnv wholesale.  Duplicates initialization logic since 
         gym-unity doesn't support docker training.  Rather than updating this, it would be better to fix 
@@ -21,7 +21,7 @@ class ObstacleTowerEnv(UnityEnv):
         :param use_visual: Whether to use visual observation or vector observation.
         :param multiagent: Whether to run in multi-agent mode (lists of obs, reward, done).
         """
-        if os.getenv('CROWDAI_IS_GRADING', False):
+        if self.is_grading():
             environment_filename = None
 
         self._env = UnityEnvironment(environment_filename, worker_id, docker_training=docker_training)
@@ -30,6 +30,7 @@ class ObstacleTowerEnv(UnityEnv):
         self._current_state = None
         self._n_agents = None
         self._multiagent = multiagent
+        self._done_grading = False
 
         # Check brain configuration
         if len(self._env.brains) != 1:
@@ -80,6 +81,16 @@ class ObstacleTowerEnv(UnityEnv):
         else:
             self._observation_space = spaces.Box(-high, high, dtype=np.float32)
 
+    def step(self, action):
+        obs, rew, done, info = super().step(action)
+        if info.get('text_observation') == 'evaluation_complete':
+            done = True
+            self._done_grading = True
+        return obs, rew, done, info
+
+    def done_grading(self):
+        return self._done_grading
+
     def is_grading(self):
-        return os.getenv('CROWDAI_IS_GRADING', False)
+        return os.getenv('OTC_EVALUATION_ENABLED', False)
 
