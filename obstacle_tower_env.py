@@ -37,6 +37,7 @@ class ObstacleTowerEnv(gym.Env):
 
         self._env = UnityEnvironment(environment_filename, worker_id, docker_training=docker_training)
         self.name = self._env.academy_name
+        self.version = self._env.academy_name.split('-v')[1]
         self.visual_obs = None
         self._current_state = None
         self._n_agents = None
