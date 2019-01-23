@@ -1,11 +1,12 @@
 import logging
+from PIL import Image
 import itertools
 import gym
 import numpy as np
 from mlagents.envs import UnityEnvironment
 from gym import error, spaces
-
 import os
+
 
 class UnityGymException(error.Error):
     """
@@ -17,8 +18,10 @@ class UnityGymException(error.Error):
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gym_unity")
 
+
 class ObstacleTowerEnv(gym.Env):
-    def __init__(self, environment_filename=None, docker_training=False, worker_id=0, flatten_actions=True):
+    def __init__(self, environment_filename=None, docker_training=False, worker_id=0,
+                 flatten_actions=True, retro=True):
         """
         WARNING: Copied from gym-unity / UnityEnv wholesale.  Duplicates initialization logic since 
         gym-unity doesn't support docker training.  Rather than updating this, it would be better to fix 
@@ -31,11 +34,13 @@ class ObstacleTowerEnv(gym.Env):
           worker_id: The index of the worker in the case where multiple environments are running.  Each 
             environment reserves port (5005 + worker_id) for communication with the Unity executable.
           flatten_actions: Flattens actions from MultiDiscrete to Discrete spaces.
+          retro: Resizes visual observation to 84x84.
         """
         if self.is_grading():
             environment_filename = None
 
-        self._env = UnityEnvironment(environment_filename, worker_id, docker_training=docker_training)
+        self._env = UnityEnvironment(environment_filename, worker_id,
+                                     docker_training=docker_training)
         self.name = self._env.academy_name
         self.visual_obs = None
         self._current_state = None
@@ -43,14 +48,16 @@ class ObstacleTowerEnv(gym.Env):
         self._multiagent = False
         self._done_grading = False
         self._flattener = None
-        self.game_over = False # Hidden flag used by Atari environments to determine if the game is over
+        self.game_over = False  # Hidden flag used by Atari environments to determine if the game is over
+        self.retro = retro
 
         use_visual = True
         flatten_branched = flatten_actions
-        uint8_visual = True
 
+        if self.retro:
+            uint8_visual = True
 
-       # Check brain configuration
+        # Check brain configuration
         if len(self._env.brains) != 1:
             raise UnityGymException(
                 "There can only be one brain in a UnityEnvironment "
@@ -96,7 +103,7 @@ class ObstacleTowerEnv(gym.Env):
         else:
             if flatten_branched:
                 logger.warning("The environment has a non-discrete action space. It will "
-                                "not be flattened.")
+                               "not be flattened.")
             high = np.array([1] * brain.vector_action_space_size[0])
             self._action_space = spaces.Box(-high, high, dtype=np.float32)
         high = np.array([np.inf] * brain.vector_observation_space_size)
@@ -188,6 +195,9 @@ class ObstacleTowerEnv(gym.Env):
     def _single_step(self, info):
         if self.use_visual:
             self.visual_obs = self._preprocess_single(info.visual_observations[0][0, :, :, :])
+            if self.retro:
+                self.visual_obs = self._resize_observation(self.visual_obs)
+                print(self.visual_obs)
             default_observation = self.visual_obs
         else:
             default_observation = info.vector_observations[0, :]
@@ -198,7 +208,7 @@ class ObstacleTowerEnv(gym.Env):
 
     def _preprocess_single(self, single_visual_obs):
         if self.uint8_visual:
-            return (255.0*single_visual_obs).astype(np.uint8)
+            return (255.0 * single_visual_obs).astype(np.uint8)
         else:
             return single_visual_obs
 
@@ -211,10 +221,10 @@ class ObstacleTowerEnv(gym.Env):
         return list(default_observation), info.rewards, info.local_done, {
             "text_observation": info.text_observations,
             "brain_info": info}
-    
+
     def _preprocess_multi(self, multiple_visual_obs):
         if self.uint8_visual:
-            return [(255.0*_visual_obs).astype(np.uint8) for _visual_obs in multiple_visual_obs]
+            return [(255.0 * _visual_obs).astype(np.uint8) for _visual_obs in multiple_visual_obs]
         else:
             return multiple_visual_obs
 
@@ -237,6 +247,14 @@ class ObstacleTowerEnv(gym.Env):
         """
         logger.warn("Could not seed environment %s", self.name)
         return
+
+    @staticmethod
+    def _resize_observation(observation):
+        retro_height = 84
+        retro_width = 84
+        obs_image = Image.fromarray(observation)
+        obs_image = obs_image.resize((retro_height, retro_width), Image.NEAREST)
+        return np.array(obs_image)
 
     def _check_agents(self, n_agents):
         if not self._multiagent and n_agents > 1:
@@ -278,11 +296,13 @@ class ObstacleTowerEnv(gym.Env):
     def number_agents(self):
         return self._n_agents
 
+
 class ActionFlattener():
     """
     Flattens branched discrete action spaces into single-branch discrete action spaces.
     """
-    def __init__(self,branched_action_space):
+
+    def __init__(self, branched_action_space):
         """
         Initialize the flattener.
         :param branched_action_space: A List containing the sizes of each branch of the action
