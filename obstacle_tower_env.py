@@ -193,7 +193,8 @@ class ObstacleTowerEnv(gym.Env):
             self.visual_obs = self._preprocess_single(info.visual_observations[0][0, :, :, :])
             if self.retro:
                 self.visual_obs = self._resize_observation(self.visual_obs)
-                print(self.visual_obs)
+                self.visual_obs = self._add_stats_to_image(
+                    self.visual_obs, info.vector_observations[0])
             default_observation = self.visual_obs
         else:
             default_observation = info.vector_observations[0, :]
@@ -246,11 +247,29 @@ class ObstacleTowerEnv(gym.Env):
 
     @staticmethod
     def _resize_observation(observation):
+        """
+        Re-sizes visual observation to 84x84
+        """
         retro_height = 84
         retro_width = 84
         obs_image = Image.fromarray(observation)
         obs_image = obs_image.resize((retro_height, retro_width), Image.NEAREST)
         return np.array(obs_image)
+
+    @staticmethod
+    def _add_stats_to_image(vis_obs, vector_obs):
+        """
+        Displays time left and number of keys on visual observation
+        """
+        key = vector_obs[0:5]
+        time = vector_obs[5]
+        key_num = np.argmax(key, axis=0)
+        time_num = min(time, 10000) / 10000
+
+        vis_obs[0:10, :, :] = 0
+        vis_obs[:5, 0:int(16.8 * key_num), 0] = 255
+        vis_obs[5:10, 0:int(time_num * 84), 1] = 255
+        return vis_obs
 
     def _check_agents(self, n_agents):
         if not self._multiagent and n_agents > 1:
