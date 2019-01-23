@@ -20,8 +20,7 @@ logger = logging.getLogger("gym_unity")
 
 
 class ObstacleTowerEnv(gym.Env):
-    def __init__(self, environment_filename=None, docker_training=False, worker_id=0,
-                 flatten_actions=True, retro=True):
+    def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True):
         """
         WARNING: Copied from gym-unity / UnityEnv wholesale.  Duplicates initialization logic since 
         gym-unity doesn't support docker training.  Rather than updating this, it would be better to fix 
@@ -33,8 +32,7 @@ class ObstacleTowerEnv(gym.Env):
             frame buffer (xvfb).
           worker_id: The index of the worker in the case where multiple environments are running.  Each 
             environment reserves port (5005 + worker_id) for communication with the Unity executable.
-          flatten_actions: Flattens actions from MultiDiscrete to Discrete spaces.
-          retro: Resizes visual observation to 84x84.
+          retro: Resize visual observation to 84x84 (int8) and flattens action space.
         """
         if self.is_grading():
             environment_filename = None
@@ -52,10 +50,8 @@ class ObstacleTowerEnv(gym.Env):
         self.retro = retro
 
         use_visual = True
-        flatten_branched = flatten_actions
-
-        if self.retro:
-            uint8_visual = True
+        flatten_branched = self.retro
+        uint8_visual = self.retro
 
         # Check brain configuration
         if len(self._env.brains) != 1:
