@@ -22,10 +22,6 @@ logger = logging.getLogger("gym_unity")
 class ObstacleTowerEnv(gym.Env):
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True):
         """
-        WARNING: Copied from gym-unity / UnityEnv wholesale.  Duplicates initialization logic since 
-        gym-unity doesn't support docker training.  Rather than updating this, it would be better to fix 
-        compatibility with gym-unity.
-
         Arguments:
           environment_filename: The file path to the Unity executable.  Does not require the extension.
           docker_training: Whether this is running within a docker environment and should use a virtual 
@@ -253,10 +249,8 @@ class ObstacleTowerEnv(gym.Env):
         """
         Re-sizes visual observation to 84x84
         """
-        retro_height = 84
-        retro_width = 84
         obs_image = Image.fromarray(observation)
-        obs_image = obs_image.resize((retro_height, retro_width), Image.NEAREST)
+        obs_image = obs_image.resize((84, 84), Image.NEAREST)
         return np.array(obs_image)
 
     @staticmethod
