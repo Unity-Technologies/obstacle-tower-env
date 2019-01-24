@@ -261,14 +261,17 @@ class ObstacleTowerEnv(gym.Env):
         """
         Displays time left and number of keys on visual observation
         """
-        key = vector_obs[0:5]
-        time = vector_obs[5]
+        key = vector_obs[0:6]
+        time = vector_obs[6]
         key_num = np.argmax(key, axis=0)
         time_num = min(time, 10000) / 10000
 
         vis_obs[0:10, :, :] = 0
-        vis_obs[:5, 0:int(16.8 * key_num), 0] = 255
-        vis_obs[5:10, 0:int(time_num * 84), 1] = 255
+        for i in range(key_num):
+            start = int(i * 16.8) + 4
+            end = start + 10
+            vis_obs[1:5, start:end, 0:2] = 255
+        vis_obs[6:10, 0:int(time_num * 84), 1] = 255
         return vis_obs
 
     def _check_agents(self, n_agents):
