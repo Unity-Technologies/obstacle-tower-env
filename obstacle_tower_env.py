@@ -195,7 +195,10 @@ class ObstacleTowerEnv(gym.Env):
                 self.visual_obs = self._resize_observation(self.visual_obs)
                 self.visual_obs = self._add_stats_to_image(
                     self.visual_obs, info.vector_observations[0])
-            default_observation = self.visual_obs
+                default_observation = self.visual_obs
+            else:
+                default_observation = self._prepare_tuple_observation(
+                    self.visual_obs, info.vector_observations[0])
         else:
             default_observation = info.vector_observations[0, :]
 
@@ -255,6 +258,16 @@ class ObstacleTowerEnv(gym.Env):
         obs_image = Image.fromarray(observation)
         obs_image = obs_image.resize((retro_height, retro_width), Image.NEAREST)
         return np.array(obs_image)
+
+    @staticmethod
+    def _prepare_tuple_observation(vis_obs, vector_obs):
+        """
+        Converts separate visual and vector observation into prepared tuple
+        """
+        key = vector_obs[0:6]
+        time = vector_obs[6]
+        key_num = np.argmax(key, axis=0)
+        return vis_obs, key_num, time
 
     @staticmethod
     def _add_stats_to_image(vis_obs, vector_obs):
