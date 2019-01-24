@@ -33,9 +33,14 @@ class ObstacleTowerEnv(gym.Env):
         if self.is_grading():
             environment_filename = None
 
-        self._env = UnityEnvironment(environment_filename, worker_id,
-                                     docker_training=docker_training)
-        self.name = self._env.academy_name
+        self._env = UnityEnvironment(environment_filename, worker_id, docker_training=docker_training)
+
+        split_name = self._env.academy_name.split('-v')
+        if len(split_name) == 2 and split_name[0] == "ObstacleTower":
+            self.name, self.version = split_name
+        else:
+            raise UnityGymException(
+                "Attempting to launch non-Obstacle Tower environment")
         self.visual_obs = None
         self._current_state = None
         self._n_agents = None
