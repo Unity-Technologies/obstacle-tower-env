@@ -29,9 +29,17 @@ It can be cited as:
 
 ### Download the environment
 
+<<<<<<< HEAD
 * Windows:
 * Mac:
 * Linux:
+=======
+| *Platform*     | *Download Link*                                                                     |
+| --- | --- |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_windows.zip |
+>>>>>>> 6e9868a... Add initial download table
 
 ### Install the Gym interface
 
