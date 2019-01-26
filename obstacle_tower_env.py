@@ -20,6 +20,8 @@ logger = logging.getLogger("gym_unity")
 
 
 class ObstacleTowerEnv(gym.Env):
+    ALLOWED_VERSIONS = ['1']
+
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True):
         """
         Arguments:
@@ -40,7 +42,16 @@ class ObstacleTowerEnv(gym.Env):
             self.name, self.version = split_name
         else:
             raise UnityGymException(
-                "Attempting to launch non-Obstacle Tower environment")
+                "Attempting to launch non-Obstacle Tower environment"
+            )
+
+        if self.version not in self.ALLOWED_VERSIONS:
+            raise UnityGymException(
+                "Invalid Obstacle Tower version.  Your build is v" + self.version + \
+                " but only the following versions are compatible with this gym: " + \
+                str(self.ALLOWED_VERSIONS)
+            )
+
         self.visual_obs = None
         self._current_state = None
         self._n_agents = None
