@@ -148,7 +148,13 @@ class ObstacleTowerEnv(gym.Env):
         Returns: observation (object/list): the initial observation of the
             space.
         """
-        info = self._env.reset()[self.brain_name]
+        reset_params = {}
+        if self._floor is not None:
+            reset_params['floor-number'] = self._floor
+        if self._seed is not None:
+            reset_params['tower-seed'] = self._seed
+
+        info = self._env.reset(config=reset_params)[self.brain_name]
         n_agents = len(info.agents)
         self._check_agents(n_agents)
         self.game_over = False
@@ -262,11 +268,31 @@ class ObstacleTowerEnv(gym.Env):
         return self.action_meanings
 
     def seed(self, seed=None):
-        """Sets the seed for this env's random number generator(s).
-        Currently not implemented.
+        """Sets a fixed seed for this env's random number generator(s).
+        The valid range for seeds is [0, 100). By default a random seed
+        will be chosen.
         """
-        logger.warn("Could not seed environment %s", self.name)
-        return
+        if seed is None:
+            self._seed = seed
+            return
+
+        seed = int(seed)
+        if seed < 0 or seed >= 100:
+            logger.warn(
+                "Seed outside of valid range [0, 100). A random seed "
+                "within the valid range will be used on next reset."
+            )
+        logger.warn("New seed " + str(seed) + " will apply on next reset.")
+        self._seed = seed
+
+    def floor(self, floor=None):
+        """Sets the floor to a fixed floor number on subsequent environment
+        resets."""
+        if floor is None:
+            self._floor = floor
+            return
+        logger.warn("New floor " + str(floor) + " will apply on next reset.")
+        self._floor = int(floor)
 
     @staticmethod
     def _resize_observation(observation):
