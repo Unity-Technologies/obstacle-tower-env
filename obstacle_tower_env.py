@@ -105,17 +105,36 @@ class ObstacleTowerEnv(gym.Env):
             self._action_space = spaces.Box(-high, high, dtype=np.float32)
         high = np.array([np.inf] * brain.vector_observation_space_size)
         self.action_meanings = brain.vector_action_descriptions
-        if self.use_visual:
-            if brain.camera_resolutions[0]["blackAndWhite"]:
-                depth = 1
-            else:
-                depth = 3
-            self._observation_space = spaces.Box(0, 1, dtype=np.float32,
-                                                 shape=(brain.camera_resolutions[0]["height"],
-                                                        brain.camera_resolutions[0]["width"],
-                                                        depth))
+
+        if brain.camera_resolutions[0]["blackAndWhite"]:
+            depth = 1
         else:
-            self._observation_space = spaces.Box(-high, high, dtype=np.float32)
+            depth = 3
+
+        image_space_max = 1.0
+        image_space_dtype = np.float32
+        camera_height = brain.camera_resolutions[0]["height"]
+        camera_width = brain.camera_resolutions[0]["width"]
+        if self.retro:
+            image_space_max = 255
+            image_space_dtype = np.uint8
+            camera_height = 84
+            camera_width = 84
+
+        image_space = spaces.Box(
+            0, image_space_max,
+            dtype=image_space_dtype,
+            shape=(camera_height, camera_width, depth)
+        )
+        if self.retro:
+            self._observation_space = image_space
+        else:
+            max_float = np.finfo(np.float32).max
+            keys_space = spaces.Discrete(5)
+            time_remaining_space = spaces.Box(low=0.0, high=max_float, shape=(1,), dtype=np.float32)
+            self._observation_space = spaces.Tuple(
+                (image_space, keys_space, time_remaining_space)
+            )
 
     def done_grading(self):
         return self._done_grading

@@ -23,32 +23,30 @@ It can be cited as:
 ## Installation
 
 ### Requirements
-* ML-Agents v0.6
+
+The Obstacle Tower environment runs on Mac OS X, Windows, or Linux.
+
+Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/obstacle-tower-env/blob/master/setup.py)):
+* Unity ML-Agents v0.6
 * OpenAI Gym
-* Mac, Windows, or Linux
+* Pillow
 
 ### Download the environment
 
-<<<<<<< HEAD
-* Windows:
-* Mac:
-* Linux:
-=======
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
 | Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_linux.zip   |
 | Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_osx.zip     |
 | Windows        | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_windows.zip |
->>>>>>> 6e9868a... Add initial download table
 
 ### Install the Gym interface
 
 ```bash
-$ pip install -e obstacle-tower-env
+$ git clone git@github.com:Unity-Technologies/obstacle-tower-env.git
+$ cd obstacle-tower-env
+$ pip install -e .
 ```
 
 ## Getting Started
 
-Below is a simple python snippet which describes how to launch and interact with the Obstacle Tower.
-
-[Insert code snippet]
+To see an example of how to interact with the environment, see our [basic usage Jupyter notebook](examples/basic_usage.ipynb).
