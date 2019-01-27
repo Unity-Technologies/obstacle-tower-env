@@ -246,7 +246,7 @@ class ObstacleTowerEnv(gym.Env):
         floor = int(floor)
         if floor < 0 or floor >= 25:
             logger.warn(
-                "Starting floor outside of valid range [0, 100). Floor 0 will be used"
+                "Starting floor outside of valid range [0, 25). Floor 0 will be used"
                 "on next reset."
             )
         logger.warn("New starting floor " + str(floor) + " will apply on next reset.")
