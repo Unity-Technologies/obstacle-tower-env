@@ -47,6 +47,8 @@ class ObstacleTowerEnv(gym.Env):
         self._multiagent = False
         self._done_grading = False
         self._flattener = None
+        self._seed = None
+        self._floor = None
         self.game_over = False  # Hidden flag used by Atari environments to determine if the game is over
         self.retro = retro
 
