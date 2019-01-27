@@ -288,13 +288,20 @@ class ObstacleTowerEnv(gym.Env):
         self._seed = seed
 
     def floor(self, floor=None):
-        """Sets the floor to a fixed floor number on subsequent environment
+        """Sets the starting floor to a fixed floor number on subsequent environment
         resets."""
         if floor is None:
             self._floor = floor
             return
-        logger.warn("New floor " + str(floor) + " will apply on next reset.")
-        self._floor = int(floor)
+
+        floor = int(floor)
+        if floor < 0 or floor >= 25:
+            logger.warn(
+                "Starting floor outside of valid range [0, 100). Floor 0 will be used"
+                "on next reset."
+            )
+        logger.warn("New starting floor " + str(floor) + " will apply on next reset.")
+        self._floor = floor
 
     @staticmethod
     def _resize_observation(observation):
