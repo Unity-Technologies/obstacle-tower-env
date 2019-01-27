@@ -55,7 +55,6 @@ class ObstacleTowerEnv(gym.Env):
         self.visual_obs = None
         self._current_state = None
         self._n_agents = None
-        self._multiagent = False
         self._done_grading = False
         self._flattener = None
         self._seed = None
@@ -63,7 +62,6 @@ class ObstacleTowerEnv(gym.Env):
         self.game_over = False  # Hidden flag used by Atari environments to determine if the game is over
         self.retro = retro
 
-        use_visual = True
         flatten_branched = self.retro
         uint8_visual = self.retro
 
@@ -75,55 +73,33 @@ class ObstacleTowerEnv(gym.Env):
         self.brain_name = self._env.external_brain_names[0]
         brain = self._env.brains[self.brain_name]
 
-        if use_visual and brain.number_visual_observations == 0:
-            raise UnityGymException("`use_visual` was set to True, however there are no"
-                                    " visual observations as part of this environment.")
-        self.use_visual = brain.number_visual_observations >= 1 and use_visual
+        if brain.number_visual_observations == 0:
+            raise UnityGymException("Environment provides no visual observations.")
 
-        if not use_visual and uint8_visual:
-            logger.warning("`uint8_visual was set to true, but visual observations are not in use. "
-                           "This setting will not have any effect.")
-        else:
-            self.uint8_visual = uint8_visual
+        self.uint8_visual = uint8_visual
 
         if brain.number_visual_observations > 1:
             logger.warning("The environment contains more than one visual observation. "
                            "Please note that only the first will be provided in the observation.")
-
-        if brain.num_stacked_vector_observations != 1:
-            raise UnityGymException(
-                "There can only be one stacked vector observation in a UnityEnvironment "
-                "if it is wrapped in a gym.")
 
         # Check for number of agents in scene.
         initial_info = self._env.reset()[self.brain_name]
         self._check_agents(len(initial_info.agents))
 
         # Set observation and action spaces
-        if brain.vector_action_space_type == "discrete":
-            if len(brain.vector_action_space_size) == 1:
-                self._action_space = spaces.Discrete(brain.vector_action_space_size[0])
-            else:
-                if flatten_branched:
-                    self._flattener = ActionFlattener(brain.vector_action_space_size)
-                    self._action_space = self._flattener.action_space
-                else:
-                    self._action_space = spaces.MultiDiscrete(brain.vector_action_space_size)
-
+        if len(brain.vector_action_space_size) == 1:
+            self._action_space = spaces.Discrete(brain.vector_action_space_size[0])
         else:
             if flatten_branched:
-                logger.warning("The environment has a non-discrete action space. It will "
-                               "not be flattened.")
-            high = np.array([1] * brain.vector_action_space_size[0])
-            self._action_space = spaces.Box(-high, high, dtype=np.float32)
+                self._flattener = ActionFlattener(brain.vector_action_space_size)
+                self._action_space = self._flattener.action_space
+            else:
+                self._action_space = spaces.MultiDiscrete(brain.vector_action_space_size)
+
         high = np.array([np.inf] * brain.vector_observation_space_size)
         self.action_meanings = brain.vector_action_descriptions
 
-        if brain.camera_resolutions[0]["blackAndWhite"]:
-            depth = 1
-        else:
-            depth = 3
-
+        depth = 3
         image_space_max = 1.0
         image_space_dtype = np.float32
         camera_height = brain.camera_resolutions[0]["height"]
@@ -172,10 +148,7 @@ class ObstacleTowerEnv(gym.Env):
         self._check_agents(n_agents)
         self.game_over = False
 
-        if not self._multiagent:
-            obs, reward, done, info = self._single_step(info)
-        else:
-            obs, reward, done, info = self._multi_step(info)
+        obs, reward, done, info = self._single_step(info)
         return obs
 
     def step(self, action):
@@ -194,33 +167,17 @@ class ObstacleTowerEnv(gym.Env):
         """
 
         # Use random actions for all other agents in environment.
-        if self._multiagent:
-            if not isinstance(action, list):
-                raise UnityGymException("The environment was expecting `action` to be a list.")
-            if len(action) != self._n_agents:
-                raise UnityGymException(
-                    "The environment was expecting a list of {} actions.".format(self._n_agents))
-            else:
-                if self._flattener is not None:
-                    # Action space is discrete and flattened - we expect a list of scalars
-                    action = [self._flattener.lookup_action(_act) for _act in action]
-                action = np.array(action)
-        else:
-            if self._flattener is not None:
-                # Translate action into list
-                action = self._flattener.lookup_action(action)
+        if self._flattener is not None:
+            # Translate action into list
+            action = self._flattener.lookup_action(action)
 
         info = self._env.step(action)[self.brain_name]
         n_agents = len(info.agents)
         self._check_agents(n_agents)
         self._current_state = info
 
-        if not self._multiagent:
-            obs, reward, done, info = self._single_step(info)
-            self.game_over = done
-        else:
-            obs, reward, done, info = self._multi_step(info)
-            self.game_over = all(done)
+        obs, reward, done, info = self._single_step(info)
+        self.game_over = done
 
         if info.get('text_observation') == 'evaluation_complete':
             done = True
@@ -228,18 +185,15 @@ class ObstacleTowerEnv(gym.Env):
         return obs, reward, done, info
 
     def _single_step(self, info):
-        if self.use_visual:
-            self.visual_obs = self._preprocess_single(info.visual_observations[0][0, :, :, :])
-            if self.retro:
-                self.visual_obs = self._resize_observation(self.visual_obs)
-                self.visual_obs = self._add_stats_to_image(
-                    self.visual_obs, info.vector_observations[0])
-                default_observation = self.visual_obs
-            else:
-                default_observation = self._prepare_tuple_observation(
-                    self.visual_obs, info.vector_observations[0])
+        self.visual_obs = self._preprocess_single(info.visual_observations[0][0, :, :, :])
+        if self.retro:
+            self.visual_obs = self._resize_observation(self.visual_obs)
+            self.visual_obs = self._add_stats_to_image(
+                self.visual_obs, info.vector_observations[0])
+            default_observation = self.visual_obs
         else:
-            default_observation = info.vector_observations[0, :]
+            default_observation = self._prepare_tuple_observation(
+                self.visual_obs, info.vector_observations[0])
 
         return default_observation, info.rewards[0], info.local_done[0], {
             "text_observation": info.text_observations[0],
@@ -250,22 +204,6 @@ class ObstacleTowerEnv(gym.Env):
             return (255.0 * single_visual_obs).astype(np.uint8)
         else:
             return single_visual_obs
-
-    def _multi_step(self, info):
-        if self.use_visual:
-            self.visual_obs = self._preprocess_multi(info.visual_observations)
-            default_observation = self.visual_obs
-        else:
-            default_observation = info.vector_observations
-        return list(default_observation), info.rewards, info.local_done, {
-            "text_observation": info.text_observations,
-            "brain_info": info}
-
-    def _preprocess_multi(self, multiple_visual_obs):
-        if self.uint8_visual:
-            return [(255.0 * _visual_obs).astype(np.uint8) for _visual_obs in multiple_visual_obs]
-        else:
-            return multiple_visual_obs
 
     def render(self, mode='rgb_array'):
         return self.visual_obs
@@ -352,14 +290,10 @@ class ObstacleTowerEnv(gym.Env):
         return vis_obs
 
     def _check_agents(self, n_agents):
-        if not self._multiagent and n_agents > 1:
+        if n_agents > 1:
             raise UnityGymException(
                 "The environment was launched as a single-agent environment, however"
                 "there is more than one agent in the scene.")
-        elif self._multiagent and n_agents <= 1:
-            raise UnityGymException(
-                "The environment was launched as a mutli-agent environment, however"
-                "there is only one agent in the scene.")
         if self._n_agents is None:
             self._n_agents = n_agents
             logger.info("{} agents within environment.".format(n_agents))
