@@ -25,6 +25,7 @@ To learn more, please read our AAAI Workshop paper:
 The Obstacle Tower environment runs on Mac OS X, Windows, or Linux.
 
 Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/obstacle-tower-env/blob/master/setup.py)):
+
 * Unity ML-Agents v0.6
 * OpenAI Gym
 * Pillow
@@ -47,4 +48,20 @@ $ pip install -e .
 
 ## Getting Started
 
-To see an example of how to interact with the environment, see our [basic usage Jupyter notebook](examples/basic_usage.ipynb).
+### Using the Gym Interface
+
+To see an example of how to interact with the environment using the gym interface, see our [Basic Usage Jupyter Notebook](examples/basic_usage.ipynb).
+
+### Player Control
+
+It is also possible to launch the environment in "Player Mode," and directly control the agent using a keyboard. This can be done by double-clicking on the binary file. The keyboard controls are as follows:
+
+| *Keyboard Key* | *Action* |
+| --- | --- |
+| W | Move character forward. |
+| S | Move character backwards. |
+| A | Move character left. |
+| D | Move character right. |
+| K | Rotate camera left. |
+| L | Rotate camera right. |
+| Space | Character jump. |
