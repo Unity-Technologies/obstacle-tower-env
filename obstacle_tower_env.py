@@ -20,7 +20,7 @@ logger = logging.getLogger("gym_unity")
 
 
 class ObstacleTowerEnv(gym.Env):
-    ALLOWED_VERSIONS = ['1']
+    ALLOWED_VERSIONS = ['1, 1.1']
 
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True):
         """
