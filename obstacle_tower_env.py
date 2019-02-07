@@ -34,6 +34,7 @@ class ObstacleTowerEnv(gym.Env):
         """
         if self.is_grading():
             environment_filename = None
+            docker_training = True
 
         self._env = UnityEnvironment(environment_filename, worker_id, docker_training=docker_training)
 
