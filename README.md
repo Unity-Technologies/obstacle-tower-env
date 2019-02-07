@@ -12,7 +12,7 @@ Within each floor, the goal of the agent is to arrive at the set of stairs leadi
 
 To learn more, please read our AAAI Workshop paper:
 
-[**The Obstacle Tower: A Generalization Challenge in Vision, Control, and Planning**](https://storage.googleapis.com/obstacle-tower-build/Obstacle_Tower_Paper_Final.pdf).
+[**Obstacle Tower: A Generalization Challenge in Vision, Control, and Planning**](https://arxiv.org/abs/1902.01378).
 
 ### Version History
 
