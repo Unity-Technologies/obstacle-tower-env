@@ -10,17 +10,17 @@ First, create a Google Cloud Platform account by navigating here: [https://cloud
 
 Find the Compute Engine page in the sidebar, as shown below, and click on it. This is the page for managing your VMs.  
 
-![Google Cloud Platform](./images/gcp_compute.png)
+![alt text](./images/gcp_compute.png "Google Compute Engine")
 
 The easiest way to get up and running is to use the Google Deep Learning VM Template (click-to-deploy) in the GCP Marketplace. This VM will take care of installing the deep learning library Tensorflow and its dependencies.
 
 1. On the Compute Engine page, click “Create Instance.” If it’s your first time creating a VM, this popup will be in the center of your screen instead. Click “Create.”
 
-![Google Cloud Platform](./images/gcp_instance.png)
+![alt text](./images/gcp_instance.png "VM Instance")
 
 2. On the sidebar, select “Marketplace”, and search for “Deep Learning VM” from Google Click-to-Deploy.
 
-![Google Cloud Platform](./images/gcp_deepvm.png)
+![alt text](./images/gcp_deepvm.png "Deep Learning VM")
 
 3. Click “Launch on Compute Engine.”
 
@@ -210,7 +210,7 @@ tensorboard --logdir=/tmp/dopamine
 
 Replace `/tmp/dopamine` with the `base_dir` you specified above. Now open a browser and go to `127.0.0.1:6006`. You should see a page that looks like this:
 
-![Tensorboard](./images/gcp_tensorboard.png)
+![alt text](./images/gcp_tensorboard.png "Tensorboard")
 
 Here, you can monitor your reward over time. AverageReturns will increase as your agent learns to solve floors of the ObstacleTower---this example agent has been training for nearly three days. How high does your agent go? Can you do better? 
 
