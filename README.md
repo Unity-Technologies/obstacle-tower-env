@@ -69,3 +69,7 @@ It is also possible to launch the environment in "Player Mode," and directly con
 | K | Rotate camera left. |
 | L | Rotate camera right. |
 | Space | Character jump. |
+
+### Training a Dopamine Rainbow agent on GCP
+
+If you are interested in training an agent using Google's Doapmine framework and/or Google Cloud Platform, see our guide [here](./examples/gcp_training.md).
