@@ -17,6 +17,10 @@ To learn more, please read our AAAI Workshop paper:
 ### Version History
 
 * v1.0 - Initial Release.
+* v1.1 - Obstacle Tower Challenge Round 1 Release.
+   * Improved determinism between resets.
+   * Fixed bug in room template leading to un-beatable floors.
+   * Improved rendering & communication speed.
 
 ## Installation
 
@@ -34,9 +38,9 @@ Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/ob
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_linux.zip   |
-| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_osx.zip     |
-| Windows        | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_windows.zip |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v1.1/obstacletower_v1.1_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1.1/obstacletower_v1.1_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v1.1/obstacletower_v1.1_windows.zip |
 
 ### Install the Gym interface
 
