@@ -128,11 +128,14 @@ class ObstacleTowerEnv(gym.Env):
 
         # Set up video capture
         try:
-            from skvideo.io import FFmpegWriter
-            self.vid_writer = FFmpegWriter('output.webm', outputdict={
-                '-vcodec': 'libvpx',
-                '-b': '300000000',
-            })
+            if self.is_grading():
+                from skvideo.io import FFmpegWriter
+                self.vid_writer = FFmpegWriter('output.webm', outputdict={
+                    '-vcodec': 'libvpx',
+                    '-b': '300000000',
+                })
+            else:
+                self.vid_writer = None
         except AssertionError:
             self.vid_writer = None
 
