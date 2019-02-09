@@ -42,6 +42,8 @@ Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/ob
 | Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1.1/obstacletower_v1.1_osx.zip     |
 | Windows        | https://storage.googleapis.com/obstacle-tower-build/v1.1/obstacletower_v1.1_windows.zip |
 
+For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v1.1/obe-v1.1-checksums.txt).
+
 ### Install the Gym interface
 
 ```bash
