@@ -62,7 +62,6 @@ class ObstacleTowerEnv(gym.Env):
         self._floor = None
         self.game_over = False  # Hidden flag used by Atari environments to determine if the game is over
         self.retro = retro
-        self._recording = False
 
         flatten_branched = self.retro
         uint8_visual = self.retro
@@ -127,19 +126,6 @@ class ObstacleTowerEnv(gym.Env):
                 (image_space, keys_space, time_remaining_space)
             )
 
-        # Set up video capture
-        try:
-            if self.is_grading():
-                from skvideo.io import FFmpegWriter
-                self.vid_writer = FFmpegWriter('output.webm', outputdict={
-                    '-vcodec': 'libvpx',
-                    '-b': '300000000',
-                })
-            else:
-                self.vid_writer = None
-        except AssertionError:
-            self.vid_writer = None
-
     def done_grading(self):
         return self._done_grading
 
@@ -197,19 +183,11 @@ class ObstacleTowerEnv(gym.Env):
         if info.get('text_observation') == 'evaluation_complete':
             done = True
             self._done_grading = True
-        elif info.get('text_observation') == 'evaluation_record':
-            self._recording = True
 
         return obs, reward, done, info
 
     def _single_step(self, info):
         self.visual_obs = self._preprocess_single(info.visual_observations[0][0, :, :, :])
-
-        if self._recording and self.vid_writer is not None:
-            self.vid_writer.writeFrame(self.visual_obs)
-            # Turn it off, since we've now correctly recorded the frame as mandated by
-            # the flag provided via text observations.
-            self._recording = False
 
         if self.retro:
             self.visual_obs = self._resize_observation(self.visual_obs)
@@ -238,8 +216,6 @@ class ObstacleTowerEnv(gym.Env):
         Environments will automatically close() themselves when
         garbage collected or when the program exits.
         """
-        if self.vid_writer is not None:
-            self.vid_writer.close()
         self._env.close()
 
     def get_action_meanings(self):

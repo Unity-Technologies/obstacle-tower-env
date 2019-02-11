@@ -12,6 +12,5 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=['mlagents_envs>=0.6.1,<0.7',
-                      'gym',
-                      'scikit-video>=1.1,<2.0']
+                      'gym']
 )
