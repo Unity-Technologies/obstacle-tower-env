@@ -12,11 +12,15 @@ Within each floor, the goal of the agent is to arrive at the set of stairs leadi
 
 To learn more, please read our AAAI Workshop paper:
 
-[**The Obstacle Tower: A Generalization Challenge in Vision, Control, and Planning**](https://storage.googleapis.com/obstacle-tower-build/Obstacle_Tower_Paper_Final.pdf).
+[**Obstacle Tower: A Generalization Challenge in Vision, Control, and Planning**](https://arxiv.org/abs/1902.01378).
 
 ### Version History
 
 * v1.0 - Initial Release.
+* v1.1 - Obstacle Tower Challenge Round 1 Release.
+   * Improved determinism between resets.
+   * Fixed bug in room template leading to un-beatable floors.
+   * Improved rendering & communication speed.
 
 ## Installation
 
@@ -34,9 +38,11 @@ Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/ob
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_linux.zip   |
-| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_osx.zip     |
-| Windows        | https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_windows.zip |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v1.1/obstacletower_v1.1_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1.1/obstacletower_v1.1_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v1.1/obstacletower_v1.1_windows.zip |
+
+For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v1.1/obe-v1.1-checksums.txt).
 
 ### Install the Gym interface
 
@@ -65,3 +71,7 @@ It is also possible to launch the environment in "Player Mode," and directly con
 | K | Rotate camera left. |
 | L | Rotate camera right. |
 | Space | Character jump. |
+
+### Training a Dopamine Rainbow agent on GCP
+
+If you are interested in training an agent using Google's Doapmine framework and/or Google Cloud Platform, see our guide [here](./examples/gcp_training.md).
