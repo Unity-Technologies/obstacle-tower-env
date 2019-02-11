@@ -217,6 +217,10 @@ class ObstacleTowerEnv(gym.Env):
         garbage collected or when the program exits.
         """
         self._env.close()
+        if self.is_grading():
+            import time
+            while True:
+                time.sleep(10)
 
     def get_action_meanings(self):
         return self.action_meanings
