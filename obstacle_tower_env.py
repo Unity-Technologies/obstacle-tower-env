@@ -22,7 +22,8 @@ logger = logging.getLogger("gym_unity")
 class ObstacleTowerEnv(gym.Env):
     ALLOWED_VERSIONS = ['1', '1.1']
 
-    def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True):
+    def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
+                 timeout_wait=30, realtime_mode=False):
         """
         Arguments:
           environment_filename: The file path to the Unity executable.  Does not require the extension.
@@ -31,12 +32,17 @@ class ObstacleTowerEnv(gym.Env):
           worker_id: The index of the worker in the case where multiple environments are running.  Each 
             environment reserves port (5005 + worker_id) for communication with the Unity executable.
           retro: Resize visual observation to 84x84 (int8) and flattens action space.
+          timeout_wait: Time for python interface to wait for environment to connect.
+          realtime_mode: Whether to render the environment window image and run environment at realtime.
         """
         if self.is_grading():
             environment_filename = None
             docker_training = True
 
-        self._env = UnityEnvironment(environment_filename, worker_id, docker_training=docker_training)
+        self._env = UnityEnvironment(environment_filename,
+                                     worker_id,
+                                     docker_training=docker_training,
+                                     timeout_wait=timeout_wait)
 
         split_name = self._env.academy_name.split('-v')
         if len(split_name) == 2 and split_name[0] == "ObstacleTower":
@@ -48,8 +54,8 @@ class ObstacleTowerEnv(gym.Env):
 
         if self.version not in self.ALLOWED_VERSIONS:
             raise UnityGymException(
-                "Invalid Obstacle Tower version.  Your build is v" + self.version + \
-                " but only the following versions are compatible with this gym: " + \
+                "Invalid Obstacle Tower version.  Your build is v" + self.version +
+                " but only the following versions are compatible with this gym: " +
                 str(self.ALLOWED_VERSIONS)
             )
 
@@ -60,6 +66,7 @@ class ObstacleTowerEnv(gym.Env):
         self._flattener = None
         self._seed = None
         self._floor = None
+        self.realtime_mode = realtime_mode
         self.game_over = False  # Hidden flag used by Atari environments to determine if the game is over
         self.retro = retro
 
@@ -84,7 +91,7 @@ class ObstacleTowerEnv(gym.Env):
                            "Please note that only the first will be provided in the observation.")
 
         # Check for number of agents in scene.
-        initial_info = self._env.reset()[self.brain_name]
+        initial_info = self._env.reset(train_mode=not self.realtime_mode)[self.brain_name]
         self._check_agents(len(initial_info.agents))
 
         # Set observation and action spaces
@@ -144,7 +151,8 @@ class ObstacleTowerEnv(gym.Env):
         if self._seed is not None:
             reset_params['tower-seed'] = self._seed
 
-        info = self._env.reset(config=reset_params)[self.brain_name]
+        info = self._env.reset(config=reset_params,
+                               train_mode=not self.realtime_mode)[self.brain_name]
         n_agents = len(info.agents)
         self._check_agents(n_agents)
         self.game_over = False
