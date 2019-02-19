@@ -157,7 +157,9 @@ cp dopamine_otc/unity_lib.py dopamine/dopamine/discrete_domains/unity_lib.py
 cp dopamine_otc/rainbow_otc.gin dopamine/dopamine/agents/rainbow/configs/rainbow_otc.gin
 ```
 
-If you didn’t extract the `obstacletower_v1_linux.zip` to the home directory, you will need to edit `rainbow_otc.gin`, specifically `create_otc_environment.environment_path` should correspond to the path to your extracted OTC executable file. There are other hyperparameters found in this file, which you can modify to improve performance. But for the sake of this exercise, we will leave them as-is. 
+If you didn’t extract the `obstacletower_v1_linux.zip` to the home directory, you will need to edit `rainbow_otc.gin`, specifically `create_otc_environment.environment_path` should correspond to the path to your extracted OTC executable file. 
+
+Furthermore, within this file you will find settings on how long to train for, and how often to evaluate your agent. Each iteration, Dopamine will train for `Runner.training_steps`, evaluate (i.e. run in inference mode) for `Runner.evaluation_steps`, record these results, and checkpoint the agent. It will repeat this process `Runner.num_iterations` number of times before quitting. For instance, you can change `Runner.num_iterations` to 40 to train for 10 million steps. You can also reduce `Runner.evaluation_steps` to reduce the time spent not training. There are other hyperparameters found in this file, which you can modify to improve performance. But for the sake of this exercise, you may leave them as-is. 
 
 **Developer’s note:** These files are based off of the Dopamine library for Atari, i.e. `atari_lib.py`. We use the same network structure for Rainbow DQN as Atari. Since Dopamine only supports single-channel (i.e. grayscale) observations, we convert the observations given by the OTC environment to grayscale.   
 
