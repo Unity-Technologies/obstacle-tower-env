@@ -98,6 +98,7 @@ Installing the obstacle tower environment will allow Obstacle Tower to act as an
 ```bash
 git clone https://github.com/Unity-Technologies/obstacle-tower-env
 pip3 install ./ 
+cd obstacle-tower-env
 cd ../
 ```
 
@@ -106,7 +107,7 @@ cd ../
 This page lists the URLs for downloading Obstacle Tower for various platforms. [https://github.com/Unity-Technologies/obstacle-tower-env](https://github.com/Unity-Technologies/obstacle-tower-env). For GCP, run
 
 ```bash
-wget https://storage.googleapis.com/obstacle-tower-build/v1/obstacletower_v1_linux.zip
+wget https://storage.googleapis.com/obstacle-tower-build/v1.1/obstacletower_v1.1_linux.zip
 unzip obstacletower_v1_linux.zip
 ```
 
