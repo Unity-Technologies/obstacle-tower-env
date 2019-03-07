@@ -21,6 +21,11 @@ To learn more, please read our AAAI Workshop paper:
    * Improved determinism between resets.
    * Fixed bug in room template leading to un-beatable floors.
    * Improved rendering & communication speed.
+* v1.2 - Hotfix release.
+	* Adds timeout_wait parameter to extend python wait time for Unity environment handshake.
+	* Adds realtime_mode parameter to launch Unity environment from API at real-time speed and render to the window.
+	* Updates Windows and Linux binaries to address launching issues.
+	* Updated v1.2 binary includes fixes for agent collision detection issues.
 
 ## Installation
 
@@ -30,6 +35,7 @@ The Obstacle Tower environment runs on Mac OS X, Windows, or Linux.
 
 Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/obstacle-tower-env/blob/master/setup.py)):
 
+* Python 3.5 - 3.6
 * Unity ML-Agents v0.6
 * OpenAI Gym
 * Pillow
