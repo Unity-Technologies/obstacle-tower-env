@@ -97,8 +97,8 @@ Installing the obstacle tower environment will allow Obstacle Tower to act as an
 
 ```bash
 git clone https://github.com/Unity-Technologies/obstacle-tower-env
-pip3 install ./ 
 cd obstacle-tower-env
+pip3 install ./ 
 cd ../
 ```
 
