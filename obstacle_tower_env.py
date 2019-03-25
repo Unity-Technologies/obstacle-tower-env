@@ -152,7 +152,7 @@ class ObstacleTowerEnv(gym.Env):
         Returns: observation (object/list): the initial observation of the
             space.
         """
-        if self.config == None
+        if self.config is None:
             reset_params = {}
         else:
             reset_params = self.config
