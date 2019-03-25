@@ -23,7 +23,7 @@ class ObstacleTowerEnv(gym.Env):
     ALLOWED_VERSIONS = ['1', '1.1', '1.2']
 
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
-                 timeout_wait=30, realtime_mode=False):
+                 timeout_wait=30, realtime_mode=False, config=None):
         """
         Arguments:
           environment_filename: The file path to the Unity executable.  Does not require the extension.
@@ -64,11 +64,18 @@ class ObstacleTowerEnv(gym.Env):
         self._n_agents = None
         self._done_grading = False
         self._flattener = None
+
+        # Environment reset parameters
         self._seed = None
         self._floor = None
+
         self.realtime_mode = realtime_mode
         self.game_over = False  # Hidden flag used by Atari environments to determine if the game is over
         self.retro = retro
+        if config != None:
+            self.config = config
+        else:
+            self.config = None
 
         flatten_branched = self.retro
         uint8_visual = self.retro
@@ -145,7 +152,10 @@ class ObstacleTowerEnv(gym.Env):
         Returns: observation (object/list): the initial observation of the
             space.
         """
-        reset_params = {}
+        if self.config == None
+            reset_params = {}
+        else:
+            reset_params = self.config
         if self._floor is not None:
             reset_params['floor-number'] = self._floor
         if self._seed is not None:
