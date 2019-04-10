@@ -107,8 +107,8 @@ cd ../
 This page lists the URLs for downloading Obstacle Tower for various platforms. [https://github.com/Unity-Technologies/obstacle-tower-env](https://github.com/Unity-Technologies/obstacle-tower-env). For GCP, run
 
 ```bash
-wget https://storage.googleapis.com/obstacle-tower-build/v1.2/obstacletower_v1.2_linux.zip
-unzip obstacletower_v1.2_linux.zip
+wget https://storage.googleapis.com/obstacle-tower-build/v1.3/obstacletower_v1.3_linux.zip
+unzip obstacletower_v1.3_linux.zip
 ```
 
 ### Install Dopamine
@@ -157,7 +157,7 @@ cp dopamine_otc/unity_lib.py dopamine/dopamine/discrete_domains/unity_lib.py
 cp dopamine_otc/rainbow_otc.gin dopamine/dopamine/agents/rainbow/configs/rainbow_otc.gin
 ```
 
-If you didn’t extract the `obstacletower_v1.2_linux.zip` to the home directory, you will need to edit `rainbow_otc.gin`, specifically `create_otc_environment.environment_path` should correspond to the path to your extracted OTC executable file. 
+If you didn’t extract the `obstacletower_v1.3_linux.zip` to the home directory, you will need to edit `rainbow_otc.gin`, specifically `create_otc_environment.environment_path` should correspond to the path to your extracted OTC executable file. 
 
 Furthermore, within this file you will find settings on how long to train for, and how often to evaluate your agent. Each iteration, Dopamine will train for `Runner.training_steps`, evaluate (i.e. run in inference mode) for `Runner.evaluation_steps`, record these results, and checkpoint the agent. It will repeat this process `Runner.num_iterations` number of times before quitting. For instance, you can change `Runner.num_iterations` to 40 to train for 10 million steps. You can also reduce `Runner.evaluation_steps` to reduce the time spent not training. There are other hyperparameters found in this file, which you can modify to improve performance. But for the sake of this exercise, you may leave them as-is. 
 
