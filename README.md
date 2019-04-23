@@ -26,6 +26,10 @@ To learn more, please read our AAAI Workshop paper:
 	* Adds realtime_mode parameter to launch Unity environment from API at real-time speed and render to the window.
 	* Updates Windows and Linux binaries to address launching issues.
 	* Updated v1.2 binary includes fixes for agent collision detection issues.
+* v1.3 Hotfix release.
+   * Resolves memory leak when running in Docker.
+   * Fixes issue where environment could freeze on certain higher floors.
+  
 
 ## Installation
 
@@ -44,11 +48,11 @@ Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/ob
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v1.2/obstacletower_v1.2_linux.zip   |
-| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1.2/obstacletower_v1.2_osx.zip     |
-| Windows        | https://storage.googleapis.com/obstacle-tower-build/v1.2/obstacletower_v1.2_windows.zip |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v1.3/obstacletower_v1.3_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1.3/obstacletower_v1.3_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v1.3/obstacletower_v1.3_windows.zip |
 
-For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v1.2/ote-v1.2-checksums.txt).
+For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v1.3/ote-v1.3-checksums.txt).
 
 ### Install the Gym interface
 
@@ -80,4 +84,4 @@ It is also possible to launch the environment in "Player Mode," and directly con
 
 ### Training a Dopamine Rainbow agent on GCP
 
-If you are interested in training an agent using Google's Doapmine framework and/or Google Cloud Platform, see our guide [here](./examples/gcp_training.md).
+If you are interested in training an agent using Google's Dopamine framework and/or Google Cloud Platform, see our guide [here](./examples/gcp_training.md).
