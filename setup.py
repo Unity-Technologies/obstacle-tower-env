@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='obstacle_tower_env',
-    version='1.3',
+    version='2.0',
     author='Unity Technologies',
     url='https://github.com/Unity-Technologies/obstacle-tower-env',
     py_modules=["obstacle_tower_env"],

@@ -20,7 +20,7 @@ logger = logging.getLogger("gym_unity")
 
 
 class ObstacleTowerEnv(gym.Env):
-    ALLOWED_VERSIONS = ['1', '1.1', '1.2', '1.3']
+    ALLOWED_VERSIONS = ['2.0']
 
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
                  timeout_wait=30, realtime_mode=False, config=None):
@@ -254,11 +254,11 @@ class ObstacleTowerEnv(gym.Env):
 
         seed = int(seed)
         if seed < 0 or seed >= 100:
-            logger.warn(
+            logger.warning(
                 "Seed outside of valid range [0, 100). A random seed "
                 "within the valid range will be used on next reset."
             )
-        logger.warn("New seed " + str(seed) + " will apply on next reset.")
+        logger.warning("New seed " + str(seed) + " will apply on next reset.")
         self._seed = seed
 
     def floor(self, floor=None):
@@ -269,12 +269,12 @@ class ObstacleTowerEnv(gym.Env):
             return
 
         floor = int(floor)
-        if floor < 0 or floor >= 25:
-            logger.warn(
-                "Starting floor outside of valid range [0, 25). Floor 0 will be used"
+        if floor < 0 or floor >= 99:
+            logger.warning(
+                "Starting floor outside of valid range [0, 99). Floor 0 will be used"
                 "on next reset."
             )
-        logger.warn("New starting floor " + str(floor) + " will apply on next reset.")
+        logger.warning("New starting floor " + str(floor) + " will apply on next reset.")
         self._floor = floor
 
     @staticmethod
@@ -303,7 +303,7 @@ class ObstacleTowerEnv(gym.Env):
         """
         key = vector_obs[0:6]
         time = vector_obs[6]
-        key_num = np.argmax(key, axis=0)
+        key_num = int(np.argmax(key, axis=0))
         time_num = min(time, 10000) / 10000
 
         vis_obs[0:10, :, :] = 0
