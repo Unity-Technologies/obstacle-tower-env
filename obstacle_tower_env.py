@@ -207,18 +207,24 @@ class ObstacleTowerEnv(gym.Env):
     def _single_step(self, info):
         self.visual_obs = self._preprocess_single(info.visual_observations[0][0, :, :, :])
 
+        self.visual_obs, keys, time, current_floor = self._prepare_tuple_observation(
+            self.visual_obs, info.vector_observations[0])
+
         if self.retro:
             self.visual_obs = self._resize_observation(self.visual_obs)
             self.visual_obs = self._add_stats_to_image(
                 self.visual_obs, info.vector_observations[0])
             default_observation = self.visual_obs
         else:
-            default_observation = self._prepare_tuple_observation(
-                self.visual_obs, info.vector_observations[0])
+            default_observation = self.visual_obs, keys, time, current_floor
 
         return default_observation, info.rewards[0], info.local_done[0], {
             "text_observation": info.text_observations[0],
-            "brain_info": info}
+            "brain_info": info,
+            "total_keys": keys,
+            "time_remaining": time,
+            "current_floor": current_floor
+        }
 
     def _preprocess_single(self, single_visual_obs):
         if self.uint8_visual:
@@ -293,8 +299,9 @@ class ObstacleTowerEnv(gym.Env):
         """
         key = vector_obs[0:6]
         time = vector_obs[6]
+        floor_number = vector_obs[7]
         key_num = np.argmax(key, axis=0)
-        return vis_obs, key_num, time
+        return vis_obs, key_num, time, floor_number
 
     @staticmethod
     def _add_stats_to_image(vis_obs, vector_obs):
