@@ -23,7 +23,7 @@ class ObstacleTowerEnv(gym.Env):
     ALLOWED_VERSIONS = ['2.0']
 
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
-                 timeout_wait=30, realtime_mode=False, config=None):
+                 timeout_wait=30, realtime_mode=False, config=None, greyscale=False):
         """
         Arguments:
           environment_filename: The file path to the Unity executable.  Does not require the extension.
@@ -64,6 +64,7 @@ class ObstacleTowerEnv(gym.Env):
         self._n_agents = None
         self._done_grading = False
         self._flattener = None
+        self._greyscale = greyscale
 
         # Environment reset parameters
         self._seed = None
@@ -114,7 +115,10 @@ class ObstacleTowerEnv(gym.Env):
         high = np.array([np.inf] * brain.vector_observation_space_size)
         self.action_meanings = brain.vector_action_descriptions
 
-        depth = 3
+        if self._greyscale:
+            depth = 1
+        else:
+            depth = 3
         image_space_max = 1.0
         image_space_dtype = np.float32
         camera_height = brain.camera_resolutions[0]["height"]
@@ -218,6 +222,9 @@ class ObstacleTowerEnv(gym.Env):
         else:
             default_observation = self.visual_obs, keys, time, current_floor
 
+        if self._greyscale:
+            default_observation = self._greyscale_obs(default_observation)
+
         return default_observation, info.rewards[0], info.local_done[0], {
             "text_observation": info.text_observations[0],
             "brain_info": info,
@@ -225,6 +232,10 @@ class ObstacleTowerEnv(gym.Env):
             "time_remaining": time,
             "current_floor": current_floor
         }
+
+    def _greyscale_obs(self, obs):
+        new_obs = np.floor(np.expand_dims(np.mean(obs, axis=2), axis=2)).astype(np.uint8)
+        return new_obs
 
     def _preprocess_single(self, single_visual_obs):
         if self.uint8_visual:
