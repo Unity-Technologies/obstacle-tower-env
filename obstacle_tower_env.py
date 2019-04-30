@@ -161,7 +161,7 @@ class ObstacleTowerEnv(gym.Env):
         else:
             reset_params = self.config
         if self._floor is not None:
-            reset_params['floor-number'] = self._floor
+            reset_params['starting-floor'] = self._floor
         if self._seed is not None:
             reset_params['tower-seed'] = self._seed
 
