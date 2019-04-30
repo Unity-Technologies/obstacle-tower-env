@@ -6,7 +6,7 @@ Obstacle Tower can be configured in a variety of ways during the episode reset. 
 | --- | --- | --- |
 | `tower-seed` | (-1 - 9999)| Sets the seed used to generate the tower. -1 corresponds to a random tower on every `reset()` call. 
 | `starting-floor` | (0, 99)| Sets the starting floor for the agent on `reset()`. 
-| `top-floor` | (1, 100) | Sets the maximum number of possible floors in the tower.
+| `total-floors` | (1, 100) | Sets the maximum number of possible floors in the tower.
 | `dense-reward` | (0, 1) | Whether to use the sparse (0) or dense (1) reward function.
 | `lighting-type` | (0, 1, 2) | Whether to use no realtime light (0), a single realtime light with minimal color variations (1), or a realtime light with large color variations (2). 
 | `visual-theme` | (0, 1, 2) | Whether to use only the `default-theme` (0), the normal ordering or themes (1), or a random theme every floor (2).
