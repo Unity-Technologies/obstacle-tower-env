@@ -150,16 +150,18 @@ class ObstacleTowerEnv(gym.Env):
     def is_grading(self):
         return os.getenv('OTC_EVALUATION_ENABLED', False)
 
-    def reset(self):
+    def reset(self, config=None):
         """Resets the state of the environment and returns an initial observation.
         In the case of multi-agent environments, this is a list.
         Returns: observation (object/list): the initial observation of the
             space.
         """
-        if self.config is None:
+        if config is None:
             reset_params = {}
+            if self.config is not None:
+                reset_params = self.config
         else:
-            reset_params = self.config
+            reset_params = config
         if self._floor is not None:
             reset_params['starting-floor'] = self._floor
         if self._seed is not None:
