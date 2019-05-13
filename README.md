@@ -29,6 +29,11 @@ To learn more, please read our AAAI Workshop paper:
 * v1.3 Hotfix release.
    * Resolves memory leak when running in Docker.
    * Fixes issue where environment could freeze on certain higher floors.
+* v2.0 Obstacle Tower Challenge Round 2 Release.
+   * Towers can now be generated with up to 100 floors.
+   * Additional visual themes, obstacles, enemy types, and floor difficulties added.
+   * Additional reset parameters added to customize generated towers.
+   * Various bugs fixed and performance improvements.
   
 
 ## Installation
