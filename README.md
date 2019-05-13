@@ -32,7 +32,7 @@ To learn more, please read our AAAI Workshop paper:
 * v2.0 Obstacle Tower Challenge Round 2 Release.
    * Towers can now be generated with up to 100 floors.
    * Additional visual themes, obstacles, enemy types, and floor difficulties added.
-   * Additional reset parameters added to customize generated towers.
+   * Additional reset parameters added to customize generated towers. Go [here](./reset-parameters.md) for details on the parameters and their values.
    * Various bugs fixed and performance improvements.
   
 
@@ -72,6 +72,10 @@ $ pip install -e .
 ### Using the Gym Interface
 
 To see an example of how to interact with the environment using the gym interface, see our [Basic Usage Jupyter Notebook](examples/basic_usage.ipynb).
+
+### Customizing the environment
+
+Obstacle Tower can be configured in a number of different ways to adjust the difficulty and content of the environment. This is done through the use of reset parameters, which can be set when calling `env.reset()`. See [here](./reset-parameters.md) for a list of the available parameters to adjust. 
 
 ### Player Control
 
