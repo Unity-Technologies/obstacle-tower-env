@@ -1,6 +1,6 @@
 # Obstacle Tower Reset Parameters
 
-Obstacle Tower can be configured in a variety of ways during the episode reset. Below are a list of parameters, along with the ranges of values and what they correspond to. Pass these as part of a `config` dictionary when calling `env.reset()`. 
+Obstacle Tower can be configured in a variety of ways during the episode reset. Below are a list of parameters, along with the ranges of values and what they correspond to. Pass these as part of a `config` dictionary when calling `env.reset(config=config)`. 
 
 | *Parameter*  | *Value range* | *Effect* |                                                                  
 | --- | --- | --- |
