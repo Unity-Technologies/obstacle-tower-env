@@ -29,6 +29,11 @@ To learn more, please read our AAAI Workshop paper:
 * v1.3 Hotfix release.
    * Resolves memory leak when running in Docker.
    * Fixes issue where environment could freeze on certain higher floors.
+* v2.0 Obstacle Tower Challenge Round 2 Release.
+   * Towers can now be generated with up to 100 floors.
+   * Additional visual themes, obstacles, enemy types, and floor difficulties added.
+   * Additional reset parameters added to customize generated towers. Go [here](./reset-parameters.md) for details on the parameters and their values.
+   * Various bugs fixed and performance improvements.
   
 
 ## Installation
@@ -48,9 +53,9 @@ Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/ob
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v1.3/obstacletower_v1.3_linux.zip   |
-| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v1.3/obstacletower_v1.3_osx.zip     |
-| Windows        | https://storage.googleapis.com/obstacle-tower-build/v1.3/obstacletower_v1.3_windows.zip |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v2.0/obstacletower_v2.0_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v2.0/obstacletower_v2.0_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v2.0/obstacletower_v2.0_windows.zip |
 
 For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v1.3/ote-v1.3-checksums.txt).
 
@@ -67,6 +72,10 @@ $ pip install -e .
 ### Using the Gym Interface
 
 To see an example of how to interact with the environment using the gym interface, see our [Basic Usage Jupyter Notebook](examples/basic_usage.ipynb).
+
+### Customizing the environment
+
+Obstacle Tower can be configured in a number of different ways to adjust the difficulty and content of the environment. This is done through the use of reset parameters, which can be set when calling `env.reset()`. See [here](./reset-parameters.md) for a list of the available parameters to adjust. 
 
 ### Player Control
 

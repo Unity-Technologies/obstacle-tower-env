@@ -20,10 +20,10 @@ logger = logging.getLogger("gym_unity")
 
 
 class ObstacleTowerEnv(gym.Env):
-    ALLOWED_VERSIONS = ['1', '1.1', '1.2', '1.3']
+    ALLOWED_VERSIONS = ['2.0']
 
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
-                 timeout_wait=30, realtime_mode=False):
+                 timeout_wait=30, realtime_mode=False, config=None, greyscale=False):
         """
         Arguments:
           environment_filename: The file path to the Unity executable.  Does not require the extension.
@@ -64,11 +64,19 @@ class ObstacleTowerEnv(gym.Env):
         self._n_agents = None
         self._done_grading = False
         self._flattener = None
+        self._greyscale = greyscale
+
+        # Environment reset parameters
         self._seed = None
         self._floor = None
+
         self.realtime_mode = realtime_mode
         self.game_over = False  # Hidden flag used by Atari environments to determine if the game is over
         self.retro = retro
+        if config != None:
+            self.config = config
+        else:
+            self.config = None
 
         flatten_branched = self.retro
         uint8_visual = self.retro
@@ -107,7 +115,10 @@ class ObstacleTowerEnv(gym.Env):
         high = np.array([np.inf] * brain.vector_observation_space_size)
         self.action_meanings = brain.vector_action_descriptions
 
-        depth = 3
+        if self._greyscale:
+            depth = 1
+        else:
+            depth = 3
         image_space_max = 1.0
         image_space_dtype = np.float32
         camera_height = brain.camera_resolutions[0]["height"]
@@ -139,15 +150,20 @@ class ObstacleTowerEnv(gym.Env):
     def is_grading(self):
         return os.getenv('OTC_EVALUATION_ENABLED', False)
 
-    def reset(self):
+    def reset(self, config=None):
         """Resets the state of the environment and returns an initial observation.
         In the case of multi-agent environments, this is a list.
         Returns: observation (object/list): the initial observation of the
             space.
         """
-        reset_params = {}
+        if config is None:
+            reset_params = {}
+            if self.config is not None:
+                reset_params = self.config
+        else:
+            reset_params = config
         if self._floor is not None:
-            reset_params['floor-number'] = self._floor
+            reset_params['starting-floor'] = self._floor
         if self._seed is not None:
             reset_params['tower-seed'] = self._seed
 
@@ -197,18 +213,31 @@ class ObstacleTowerEnv(gym.Env):
     def _single_step(self, info):
         self.visual_obs = self._preprocess_single(info.visual_observations[0][0, :, :, :])
 
+        self.visual_obs, keys, time, current_floor = self._prepare_tuple_observation(
+            self.visual_obs, info.vector_observations[0])
+
         if self.retro:
             self.visual_obs = self._resize_observation(self.visual_obs)
             self.visual_obs = self._add_stats_to_image(
                 self.visual_obs, info.vector_observations[0])
             default_observation = self.visual_obs
         else:
-            default_observation = self._prepare_tuple_observation(
-                self.visual_obs, info.vector_observations[0])
+            default_observation = self.visual_obs, keys, time, current_floor
+
+        if self._greyscale:
+            default_observation = self._greyscale_obs(default_observation)
 
         return default_observation, info.rewards[0], info.local_done[0], {
             "text_observation": info.text_observations[0],
-            "brain_info": info}
+            "brain_info": info,
+            "total_keys": keys,
+            "time_remaining": time,
+            "current_floor": current_floor
+        }
+
+    def _greyscale_obs(self, obs):
+        new_obs = np.floor(np.expand_dims(np.mean(obs, axis=2), axis=2)).astype(np.uint8)
+        return new_obs
 
     def _preprocess_single(self, single_visual_obs):
         if self.uint8_visual:
@@ -244,11 +273,11 @@ class ObstacleTowerEnv(gym.Env):
 
         seed = int(seed)
         if seed < 0 or seed >= 100:
-            logger.warn(
+            logger.warning(
                 "Seed outside of valid range [0, 100). A random seed "
                 "within the valid range will be used on next reset."
             )
-        logger.warn("New seed " + str(seed) + " will apply on next reset.")
+        logger.warning("New seed " + str(seed) + " will apply on next reset.")
         self._seed = seed
 
     def floor(self, floor=None):
@@ -259,12 +288,12 @@ class ObstacleTowerEnv(gym.Env):
             return
 
         floor = int(floor)
-        if floor < 0 or floor >= 25:
-            logger.warn(
-                "Starting floor outside of valid range [0, 25). Floor 0 will be used"
+        if floor < 0 or floor >= 99:
+            logger.warning(
+                "Starting floor outside of valid range [0, 99). Floor 0 will be used"
                 "on next reset."
             )
-        logger.warn("New starting floor " + str(floor) + " will apply on next reset.")
+        logger.warning("New starting floor " + str(floor) + " will apply on next reset.")
         self._floor = floor
 
     @staticmethod
@@ -283,8 +312,9 @@ class ObstacleTowerEnv(gym.Env):
         """
         key = vector_obs[0:6]
         time = vector_obs[6]
+        floor_number = vector_obs[7]
         key_num = np.argmax(key, axis=0)
-        return vis_obs, key_num, time
+        return vis_obs, key_num, time, floor_number
 
     @staticmethod
     def _add_stats_to_image(vis_obs, vector_obs):
@@ -293,7 +323,7 @@ class ObstacleTowerEnv(gym.Env):
         """
         key = vector_obs[0:6]
         time = vector_obs[6]
-        key_num = np.argmax(key, axis=0)
+        key_num = int(np.argmax(key, axis=0))
         time_num = min(time, 10000) / 10000
 
         vis_obs[0:10, :, :] = 0
