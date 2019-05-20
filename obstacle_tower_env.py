@@ -140,8 +140,9 @@ class ObstacleTowerEnv(gym.Env):
             max_float = np.finfo(np.float32).max
             keys_space = spaces.Discrete(5)
             time_remaining_space = spaces.Box(low=0.0, high=max_float, shape=(1,), dtype=np.float32)
+            floor_space = spaces.Discrete(100)
             self._observation_space = spaces.Tuple(
-                (image_space, keys_space, time_remaining_space)
+                (image_space, keys_space, time_remaining_space,floor_space)
             )
 
     def done_grading(self):
