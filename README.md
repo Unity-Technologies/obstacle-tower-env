@@ -34,6 +34,9 @@ To learn more, please read our AAAI Workshop paper:
    * Additional visual themes, obstacles, enemy types, and floor difficulties added.
    * Additional reset parameters added to customize generated towers. Go [here](./reset-parameters.md) for details on the parameters and their values.
    * Various bugs fixed and performance improvements.
+* v2.1 Hotfix release.
+   * Resolves issue with new seeds not being applied on `env.reset`.
+   * Resolves issue with underspecified observation space.
   
 
 ## Installation
@@ -53,11 +56,11 @@ Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/ob
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v2.0/obstacletower_v2.0_linux.zip   |
-| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v2.0/obstacletower_v2.0_osx.zip     |
-| Windows        | https://storage.googleapis.com/obstacle-tower-build/v2.0/obstacletower_v2.0_windows.zip |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v2.1/obstacletower_v2.1_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v2.1/obstacletower_v2.1_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v2.1/obstacletower_v2.1_windows.zip |
 
-For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v1.3/ote-v1.3-checksums.txt).
+For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v2.1/ote-v2.1-checksums.txt).
 
 ### Install the Gym interface
 
