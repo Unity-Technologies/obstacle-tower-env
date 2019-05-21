@@ -20,7 +20,7 @@ logger = logging.getLogger("gym_unity")
 
 
 class ObstacleTowerEnv(gym.Env):
-    ALLOWED_VERSIONS = ['2.0']
+    ALLOWED_VERSIONS = ['2.0', '2.1']
 
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
                  timeout_wait=30, realtime_mode=False, config=None, greyscale=False):
@@ -140,8 +140,9 @@ class ObstacleTowerEnv(gym.Env):
             max_float = np.finfo(np.float32).max
             keys_space = spaces.Discrete(5)
             time_remaining_space = spaces.Box(low=0.0, high=max_float, shape=(1,), dtype=np.float32)
+            floor_space = spaces.Discrete(9999)
             self._observation_space = spaces.Tuple(
-                (image_space, keys_space, time_remaining_space)
+                (image_space, keys_space, time_remaining_space, floor_space)
             )
 
     def done_grading(self):
