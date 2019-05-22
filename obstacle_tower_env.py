@@ -3,7 +3,7 @@ from PIL import Image
 import itertools
 import gym
 import numpy as np
-from mlagents_envs import UnityEnvironment
+from mlagents.envs import UnityEnvironment
 from gym import error, spaces
 import os
 
@@ -20,7 +20,7 @@ logger = logging.getLogger("gym_unity")
 
 
 class ObstacleTowerEnv(gym.Env):
-    ALLOWED_VERSIONS = ['2.0', '2.1']
+    ALLOWED_VERSIONS = ['3.0']
 
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
                  timeout_wait=30, realtime_mode=False, config=None, greyscale=False):
@@ -212,7 +212,7 @@ class ObstacleTowerEnv(gym.Env):
         return obs, reward, done, info
 
     def _single_step(self, info):
-        self.visual_obs = self._preprocess_single(info.visual_observations[0][0, :, :, :])
+        self.visual_obs = self._preprocess_single(info.visual_observations[0][0][:, :, :])
 
         self.visual_obs, keys, time, current_floor = self._prepare_tuple_observation(
             self.visual_obs, info.vector_observations[0])
