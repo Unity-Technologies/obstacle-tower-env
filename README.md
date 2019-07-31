@@ -40,6 +40,8 @@ To learn more, please read our AAAI Workshop paper:
 * v2.2 Hotfix release.
    * Resolves issue with reset parameters sometimes not being updated during `env.reset`.
    * Resolves issue where agents could possibly skip levels.
+* v3.0 Open Source release available [here](https://github.com/Unity-Technologies/obstacle-tower-source).
+   * Added evaluation script for benchmarking, along with official benchmarking guidelines.
   
 
 ## Installation
@@ -59,11 +61,11 @@ Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/ob
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v2.2/obstacletower_v2.2_linux.zip   |
-| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v2.2/obstacletower_v2.2_osx.zip     |
-| Windows        | https://storage.googleapis.com/obstacle-tower-build/v2.2/obstacletower_v2.2_windows.zip |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_windows.zip |
 
-For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v2.2/ote-v2.2-checksums.txt).
+For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v3.0/ote-v3.0-checksums.txt).
 
 ### Install the Gym interface
 
