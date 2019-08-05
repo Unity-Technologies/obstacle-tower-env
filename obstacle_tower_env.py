@@ -420,7 +420,7 @@ class ObstacleTowerEvaluation(gym.Wrapper):
     def __init__(self, env, seeds):
         """
         Arguments:
-        env: ObstacleTowerEnv for
+        env: ObstacleTowerEnv object created externally.
         """
         super().__init__(env)
 
