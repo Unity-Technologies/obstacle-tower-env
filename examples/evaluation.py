@@ -4,14 +4,17 @@ import argparse
 import time
 import multiprocessing
 
+
 def run_episode(env):
     done = False
-    reward = 0.0
+    episode_return = 0.0
     
     while not done:
         action = env.action_space.sample()
         obs, reward, done, info = env.step(action)
-    return reward
+        episode_return += reward
+    return episode_return
+
 
 if __name__ == '__main__':
     # In this example we use the seeds used for evaluating submissions 
