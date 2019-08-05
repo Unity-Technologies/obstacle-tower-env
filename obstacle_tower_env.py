@@ -1,4 +1,7 @@
 import logging
+import time
+from collections import deque
+
 from PIL import Image
 import itertools
 import gym
@@ -6,7 +9,6 @@ import numpy as np
 import time
 from collections import deque
 from gym import error, spaces
-import os
 from mlagents.envs import UnityEnvironment
 
 

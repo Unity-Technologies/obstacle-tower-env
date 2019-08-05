@@ -1,8 +1,4 @@
 from obstacle_tower_env import ObstacleTowerEnv, ObstacleTowerEvaluation
-import sys
-import argparse
-import time
-import multiprocessing
 
 
 def run_episode(env):
