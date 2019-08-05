@@ -250,7 +250,7 @@ class ObstacleTowerEnv(gym.Env):
 
     def seed(self, seed=None):
         """Sets a fixed seed for this env's random number generator(s).
-        The valid range for seeds is [0, 100). By default a random seed
+        The valid range for seeds is [0, 99999). By default a random seed
         will be chosen.
         """
         if seed is None:
@@ -258,6 +258,11 @@ class ObstacleTowerEnv(gym.Env):
             return
 
         seed = int(seed)
+        if seed < 0 or seed >= 99999:
+            logger.warning(
+                "Seed outside of valid range [0, 99999). A random seed "
+                "within the valid range will be used on next reset."
+            )
         logger.warning("New seed " + str(seed) + " will apply on next reset.")
         self._seed = seed
 
@@ -269,9 +274,9 @@ class ObstacleTowerEnv(gym.Env):
             return
 
         floor = int(floor)
-        if floor < 0 or floor >= 99:
+        if floor < 0 or floor > 99:
             logger.warning(
-                "Starting floor outside of valid range [0, 99). Floor 0 will be used"
+                "Starting floor outside of valid range [0, 99]. Floor 0 will be used"
                 "on next reset."
             )
         logger.warning("New starting floor " + str(floor) + " will apply on next reset.")
