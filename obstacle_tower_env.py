@@ -414,7 +414,7 @@ class EpisodeResults:
         return {
             'seed': self.seed,
             'time_elapsed': self.time_elapsed,
-            'reward': self.reward,
+            'episode_reward': self.reward,
             'max_floor_reached': self.max_floor_reached,
             'total_steps': self.total_steps
         }
@@ -441,6 +441,7 @@ class ObstacleTowerEvaluation(gym.Wrapper):
         self.episode_results = {}
         self.episodic_return = 0.0
         self.episodic_steps = 0
+        self.current_floor = 0
         self.seeds = deque(seeds)
         self.current_seed = self.seeds.popleft()
         self.env.seed(self.current_seed)
@@ -453,6 +454,7 @@ class ObstacleTowerEvaluation(gym.Wrapper):
         obs = self.env.reset()
         self.episodic_return = 0.0
         self.episodic_steps = 0
+        self.current_floor = 0
         self.episode_results[self.current_seed] = EpisodeResults(self.current_seed)
         return obs
 
@@ -463,10 +465,12 @@ class ObstacleTowerEvaluation(gym.Wrapper):
         observation, reward, done, info = self.env.step(action)
         self.episodic_return += reward
         self.episodic_steps += 1
+        if info['current_floor'] > self.current_floor:
+            self.current_floor = info['current_floor']
         if done:
             self.episode_results[self.current_seed].complete(
                 self.episodic_return,
-                info['current_floor'],
+                self.current_floor,
                 self.episodic_steps)
             if len(self.seeds) > 0:
                 self.current_seed = self.seeds.popleft()
