@@ -399,21 +399,24 @@ class EpisodeResults:
         self.seed = seed
         self.start_time = time.time()
         self.time_elapsed = None
+        self.total_steps = 0
         self.reward = 0.0
         self.max_floor_reached = 0
 
-    def complete(self, reward, floor):
+    def complete(self, reward, floor, total_steps):
         curr_time = time.time()
         self.time_elapsed = curr_time - self.start_time
         self.reward = reward
         self.max_floor_reached = floor
+        self.total_steps = total_steps
 
     def as_dict(self):
         return {
             'seed': self.seed,
             'time_elapsed': self.time_elapsed,
             'reward': self.reward,
-            'max_floor_reached': self.max_floor_reached
+            'max_floor_reached': self.max_floor_reached,
+            'total_steps': self.total_steps
         }
 
 
@@ -436,6 +439,8 @@ class ObstacleTowerEvaluation(gym.Wrapper):
         if len(seeds) < 1:
             raise UnityGymException("No seeds provided for evaluation.")
         self.episode_results = {}
+        self.episodic_return = 0.0
+        self.episodic_steps = 0
         self.seeds = deque(seeds)
         self.current_seed = self.seeds.popleft()
         self.env.seed(self.current_seed)
@@ -446,6 +451,8 @@ class ObstacleTowerEvaluation(gym.Wrapper):
             raise UnityGymException("Attempting to reset but evaluation has completed.")
 
         obs = self.env.reset()
+        self.episodic_return = 0.0
+        self.episodic_steps = 0
         self.episode_results[self.current_seed] = EpisodeResults(self.current_seed)
         return obs
 
@@ -454,8 +461,13 @@ class ObstacleTowerEvaluation(gym.Wrapper):
             raise UnityGymException("Attempting to step but evaluation has completed.")
 
         observation, reward, done, info = self.env.step(action)
+        self.episodic_return += reward
+        self.episodic_steps += 1
         if done:
-            self.episode_results[self.current_seed].complete(reward, info['current_floor'])
+            self.episode_results[self.current_seed].complete(
+                self.episodic_return,
+                info['current_floor'],
+                self.episodic_steps)
             if len(self.seeds) > 0:
                 self.current_seed = self.seeds.popleft()
                 self.env.seed(self.current_seed)
@@ -474,16 +486,18 @@ class ObstacleTowerEvaluation(gym.Wrapper):
         Returns the evaluation results in a dictionary.  Results include the average reward and floor 
         reached for each seed and the list of rewards / floors reached for each seed.
         """
-        summary_results = {}
         total_reward = 0.0
         total_floors = 0.0
+        total_steps = 0.0
         num_episodes = len(self.episode_results.values())
         for result in self.episode_results.values():
             total_reward += result.reward
             total_floors += result.max_floor_reached
+            total_steps += result.total_steps
         return {
             'average_reward': total_reward / num_episodes,
             'average_floor_reached': total_floors / num_episodes,
+            'average_episode_steps': total_steps / num_episodes,
             'episode_count': num_episodes,
             'episodes': list(map(lambda es: es.as_dict(), self.episode_results.values()))
         }
