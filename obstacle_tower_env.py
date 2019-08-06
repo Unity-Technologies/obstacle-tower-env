@@ -1,11 +1,15 @@
 import logging
+import time
+from collections import deque
+
 from PIL import Image
 import itertools
 import gym
 import numpy as np
-from mlagents_envs import UnityEnvironment
+import time
+from collections import deque
 from gym import error, spaces
-import os
+from mlagents.envs import UnityEnvironment
 
 
 class UnityGymException(error.Error):
@@ -17,10 +21,10 @@ class UnityGymException(error.Error):
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gym_unity")
-
+    
 
 class ObstacleTowerEnv(gym.Env):
-    ALLOWED_VERSIONS = ['2.0', '2.1', '2.2']
+    ALLOWED_VERSIONS = ['3.0']
 
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
                  timeout_wait=30, realtime_mode=False, config=None, greyscale=False):
@@ -35,10 +39,6 @@ class ObstacleTowerEnv(gym.Env):
           timeout_wait: Time for python interface to wait for environment to connect.
           realtime_mode: Whether to render the environment window image and run environment at realtime.
         """
-        if self.is_grading():
-            environment_filename = None
-            docker_training = True
-
         self._env = UnityEnvironment(environment_filename,
                                      worker_id,
                                      docker_training=docker_training,
@@ -62,7 +62,6 @@ class ObstacleTowerEnv(gym.Env):
         self.visual_obs = None
         self._current_state = None
         self._n_agents = None
-        self._done_grading = False
         self._flattener = None
         self._greyscale = greyscale
 
@@ -145,12 +144,6 @@ class ObstacleTowerEnv(gym.Env):
                 (image_space, keys_space, time_remaining_space, floor_space)
             )
 
-    def done_grading(self):
-        return self._done_grading
-
-    def is_grading(self):
-        return os.getenv('OTC_EVALUATION_ENABLED', False)
-
     def reset(self, config=None):
         """Resets the state of the environment and returns an initial observation.
         In the case of multi-agent environments, this is a list.
@@ -168,6 +161,7 @@ class ObstacleTowerEnv(gym.Env):
         if self._seed is not None:
             reset_params['tower-seed'] = self._seed
 
+        self.reset_params = self._env.reset_parameters
         info = self._env.reset(config=reset_params,
                                train_mode=not self.realtime_mode)[self.brain_name]
         n_agents = len(info.agents)
@@ -205,14 +199,10 @@ class ObstacleTowerEnv(gym.Env):
         obs, reward, done, info = self._single_step(info)
         self.game_over = done
 
-        if info.get('text_observation') == 'evaluation_complete':
-            done = True
-            self._done_grading = True
-
         return obs, reward, done, info
 
     def _single_step(self, info):
-        self.visual_obs = self._preprocess_single(info.visual_observations[0][0, :, :, :])
+        self.visual_obs = self._preprocess_single(info.visual_observations[0][0][:, :, :])
 
         self.visual_obs, keys, time, current_floor = self._prepare_tuple_observation(
             self.visual_obs, info.vector_observations[0])
@@ -255,17 +245,13 @@ class ObstacleTowerEnv(gym.Env):
         garbage collected or when the program exits.
         """
         self._env.close()
-        if self.is_grading():
-            import time
-            while True:
-                time.sleep(10)
 
     def get_action_meanings(self):
         return self.action_meanings
 
     def seed(self, seed=None):
         """Sets a fixed seed for this env's random number generator(s).
-        The valid range for seeds is [0, 100). By default a random seed
+        The valid range for seeds is [0, 99999). By default a random seed
         will be chosen.
         """
         if seed is None:
@@ -273,9 +259,9 @@ class ObstacleTowerEnv(gym.Env):
             return
 
         seed = int(seed)
-        if seed < 0 or seed >= 100:
+        if seed < 0 or seed >= 99999:
             logger.warning(
-                "Seed outside of valid range [0, 100). A random seed "
+                "Seed outside of valid range [0, 99999). A random seed "
                 "within the valid range will be used on next reset."
             )
         logger.warning("New seed " + str(seed) + " will apply on next reset.")
@@ -289,9 +275,9 @@ class ObstacleTowerEnv(gym.Env):
             return
 
         floor = int(floor)
-        if floor < 0 or floor >= 99:
+        if floor < 0 or floor > 99:
             logger.warning(
-                "Starting floor outside of valid range [0, 99). Floor 0 will be used"
+                "Starting floor outside of valid range [0, 99]. Floor 0 will be used"
                 "on next reset."
             )
         logger.warning("New starting floor " + str(floor) + " will apply on next reset.")
@@ -407,3 +393,121 @@ class ActionFlattener():
         :return: The List containing the branched actions.
         """
         return self.action_lookup[action]
+
+
+class EpisodeResults:
+    def __init__(self, seed, reset_params):
+        self.seed = seed
+        self.start_time = time.time()
+        self.time_elapsed = None
+        self.total_steps = 0
+        self.reward = 0.0
+        self.max_floor_reached = 0
+        self.reset_params = reset_params
+
+    def complete(self, reward, floor, total_steps):
+        curr_time = time.time()
+        self.time_elapsed = curr_time - self.start_time
+        self.reward = reward
+        self.max_floor_reached = floor
+        self.total_steps = total_steps
+
+    def as_dict(self):
+        return {
+            'seed': self.seed,
+            'time_elapsed': self.time_elapsed,
+            'episode_reward': self.reward,
+            'max_floor_reached': self.max_floor_reached,
+            'total_steps': self.total_steps,
+            'reset_params': self.reset_params
+        }
+
+
+class ObstacleTowerEvaluation(gym.Wrapper):
+    """
+    Environment wrapper for performing evaluation. Accepts an ObstacleTowerEnv and a list 
+    of seeds and will collect resulting rewards and floors reached for each seed.  This wrapper 
+    automatically resets the environment, so an external environment reset is not necessary.
+    """
+
+    def __init__(self, env, seeds):
+        """
+        Arguments:
+        env: ObstacleTowerEnv object created externally.
+        """
+        super().__init__(env)
+
+        if not isinstance(seeds, list):
+            raise UnityGymException("Invalid seeds list for evaluation.")
+        if len(seeds) < 1:
+            raise UnityGymException("No seeds provided for evaluation.")
+        self.episode_results = {}
+        self.episodic_return = 0.0
+        self.episodic_steps = 0
+        self.current_floor = 0
+        self.seeds = deque(seeds)
+        self.current_seed = self.seeds.popleft()
+        self.env.seed(self.current_seed)
+        self.reset()
+
+    def reset(self):
+        if self.current_seed is None:
+            raise UnityGymException("Attempting to reset but evaluation has completed.")
+
+        obs = self.env.reset()
+        self.episodic_return = 0.0
+        self.episodic_steps = 0
+        self.current_floor = 0
+        self.episode_results[self.current_seed] = EpisodeResults(
+            self.current_seed,
+            self.env.reset_params
+        )
+        return obs
+
+    def step(self, action):
+        if self.current_seed is None:
+            raise UnityGymException("Attempting to step but evaluation has completed.")
+
+        observation, reward, done, info = self.env.step(action)
+        self.episodic_return += reward
+        self.episodic_steps += 1
+        if info['current_floor'] > self.current_floor:
+            self.current_floor = info['current_floor']
+        if done:
+            self.episode_results[self.current_seed].complete(
+                self.episodic_return,
+                self.current_floor,
+                self.episodic_steps)
+            if len(self.seeds) > 0:
+                self.current_seed = self.seeds.popleft()
+                self.env.seed(self.current_seed)
+                self.reset()
+            else:
+                self.current_seed = None
+        return observation, reward, done, info
+
+    @property
+    def evaluation_complete(self):
+        return self.current_seed is None
+
+    @property
+    def results(self):
+        """
+        Returns the evaluation results in a dictionary.  Results include the average reward and floor 
+        reached for each seed and the list of rewards / floors reached for each seed.
+        """
+        total_reward = 0.0
+        total_floors = 0.0
+        total_steps = 0.0
+        num_episodes = len(self.episode_results.values())
+        for result in self.episode_results.values():
+            total_reward += result.reward
+            total_floors += result.max_floor_reached
+            total_steps += result.total_steps
+        return {
+            'average_reward': total_reward / num_episodes,
+            'average_floor_reached': total_floors / num_episodes,
+            'average_episode_steps': total_steps / num_episodes,
+            'episode_count': num_episodes,
+            'episodes': list(map(lambda es: es.as_dict(), self.episode_results.values()))
+        }

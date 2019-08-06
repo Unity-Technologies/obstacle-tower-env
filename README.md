@@ -40,6 +40,8 @@ To learn more, please read our AAAI Workshop paper:
 * v2.2 Hotfix release.
    * Resolves issue with reset parameters sometimes not being updated during `env.reset`.
    * Resolves issue where agents could possibly skip levels.
+* v3.0 Open Source release available [here](https://github.com/Unity-Technologies/obstacle-tower-source).
+   * Added evaluation script for benchmarking, along with official benchmarking guidelines.
   
 
 ## Installation
@@ -50,8 +52,8 @@ The Obstacle Tower environment runs on Mac OS X, Windows, or Linux.
 
 Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/obstacle-tower-env/blob/master/setup.py)):
 
-* Python 3.5 - 3.6
-* Unity ML-Agents v0.6
+* Python 3.5 - 3.7
+* Unity ML-Agents v0.8
 * OpenAI Gym
 * Pillow
 
@@ -59,11 +61,11 @@ Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/ob
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v2.2/obstacletower_v2.2_linux.zip   |
-| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v2.2/obstacletower_v2.2_osx.zip     |
-| Windows        | https://storage.googleapis.com/obstacle-tower-build/v2.2/obstacletower_v2.2_windows.zip |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_windows.zip |
 
-For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v2.2/ote-v2.2-checksums.txt).
+For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v3.0/ote-v3.0-checksums.txt).
 
 ### Install the Gym interface
 
@@ -96,6 +98,10 @@ It is also possible to launch the environment in "Player Mode," and directly con
 | K | Rotate camera left. |
 | L | Rotate camera right. |
 | Space | Character jump. |
+
+### Performance evaluation
+
+We provide an environment wrapper for evaluating performance of a player or agent across multiple pre-defined seeds.  We provide [an example implementation](examples/evaluation.py) of evaluation on a random policy.
 
 ### Training a Dopamine Rainbow agent on GCP
 

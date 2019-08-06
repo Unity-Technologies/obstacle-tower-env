@@ -6,7 +6,7 @@ Obstacle Tower can be configured in a variety of ways both when launching the en
 
 | *Parameter*  | *Value range* | *Effect* |                                                                  
 | --- | --- | --- |
-| `tower-seed` | (-1 - 100)| Sets the seed used to generate the tower. -1 corresponds to a random tower on every `reset()` call. 
+| `tower-seed` | (-1 - 99999)| Sets the seed used to generate the tower. -1 corresponds to a random tower on every `reset()` call. 
 | `starting-floor` | (0, 99)| Sets the starting floor for the agent on `reset()`. 
 | `total-floors` | (1, 100) | Sets the maximum number of possible floors in the tower.
 | `dense-reward` | (0, 1) | Whether to use the sparse (0) or dense (1) reward function.
