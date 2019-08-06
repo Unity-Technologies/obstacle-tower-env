@@ -161,6 +161,7 @@ class ObstacleTowerEnv(gym.Env):
         if self._seed is not None:
             reset_params['tower-seed'] = self._seed
 
+        self.reset_params = self._env.reset_parameters
         info = self._env.reset(config=reset_params,
                                train_mode=not self.realtime_mode)[self.brain_name]
         n_agents = len(info.agents)
@@ -395,13 +396,14 @@ class ActionFlattener():
 
 
 class EpisodeResults:
-    def __init__(self, seed):
+    def __init__(self, seed, reset_params):
         self.seed = seed
         self.start_time = time.time()
         self.time_elapsed = None
         self.total_steps = 0
         self.reward = 0.0
         self.max_floor_reached = 0
+        self.reset_params = reset_params
 
     def complete(self, reward, floor, total_steps):
         curr_time = time.time()
@@ -416,7 +418,8 @@ class EpisodeResults:
             'time_elapsed': self.time_elapsed,
             'episode_reward': self.reward,
             'max_floor_reached': self.max_floor_reached,
-            'total_steps': self.total_steps
+            'total_steps': self.total_steps,
+            'reset_params': self.reset_params
         }
 
 
@@ -455,7 +458,10 @@ class ObstacleTowerEvaluation(gym.Wrapper):
         self.episodic_return = 0.0
         self.episodic_steps = 0
         self.current_floor = 0
-        self.episode_results[self.current_seed] = EpisodeResults(self.current_seed)
+        self.episode_results[self.current_seed] = EpisodeResults(
+            self.current_seed,
+            self.env.reset_params
+        )
         return obs
 
     def step(self, action):
