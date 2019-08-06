@@ -99,6 +99,10 @@ It is also possible to launch the environment in "Player Mode," and directly con
 | L | Rotate camera right. |
 | Space | Character jump. |
 
+### Performance evaluation
+
+We provide an environment wrapper for evaluating performance of a player or agent across multiple pre-defined seeds.  We provide [an example implementation](examples/evaluation.py) of evaluation on a random policy.
+
 ### Training a Dopamine Rainbow agent on GCP
 
 If you are interested in training an agent using Google's Dopamine framework and/or Google Cloud Platform, see our guide [here](./examples/gcp_training.md).
