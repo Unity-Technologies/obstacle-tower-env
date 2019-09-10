@@ -61,7 +61,7 @@ Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/ob
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_linux.zip   |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0a_linux.zip   |
 | Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_osx.zip     |
 | Windows        | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_windows.zip |
 
