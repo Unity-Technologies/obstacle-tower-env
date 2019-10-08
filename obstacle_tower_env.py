@@ -9,7 +9,7 @@ import numpy as np
 import time
 from collections import deque
 from gym import error, spaces
-from mlagents.envs import UnityEnvironment
+from mlagents.envs.environment import UnityEnvironment
 
 
 class UnityGymException(error.Error):
@@ -24,7 +24,7 @@ logger = logging.getLogger("gym_unity")
     
 
 class ObstacleTowerEnv(gym.Env):
-    ALLOWED_VERSIONS = ['3.0']
+    ALLOWED_VERSIONS = ['3.1']
 
     def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
                  timeout_wait=30, realtime_mode=False, config=None, greyscale=False):
