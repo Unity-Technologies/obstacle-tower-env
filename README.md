@@ -42,6 +42,8 @@ To learn more, please read our AAAI Workshop paper:
    * Resolves issue where agents could possibly skip levels.
 * v3.0 Open Source release available [here](https://github.com/Unity-Technologies/obstacle-tower-source).
    * Added evaluation script for benchmarking, along with official benchmarking guidelines.
+* v3.1 Minor release.
+   * Updates Unity project to 2019.2 and ML-Agents version to 0.10.
   
 
 ## Installation
@@ -53,19 +55,18 @@ The Obstacle Tower environment runs on Mac OS X, Windows, or Linux.
 Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/obstacle-tower-env/blob/master/setup.py)):
 
 * Python 3.5 - 3.7
-* Unity ML-Agents v0.8
+* Unity ML-Agents v0.10
 * OpenAI Gym
-* Pillow
 
 ### Download the environment
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0a_linux.zip   |
-| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_osx.zip     |
-| Windows        | https://storage.googleapis.com/obstacle-tower-build/v3.0/obstacletower_v3.0_windows.zip |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v3.1/obstacletower_v3.1_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v3.1/obstacletower_v3.1_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v3.1/obstacletower_v3.1_windows.zip |
 
-For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v3.0/ote-v3.0-checksums.txt).
+For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v3.1/ote-v3.1-checksums.txt).
 
 ### Install the Gym interface
 
