@@ -54,7 +54,7 @@ The Obstacle Tower environment runs on Mac OS X, Windows, or Linux.
 
 Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/obstacle-tower-env/blob/master/setup.py)):
 
-* Python 3.5 - 3.7
+* Python 3.6
 * Unity ML-Agents v0.10
 * OpenAI Gym
 
