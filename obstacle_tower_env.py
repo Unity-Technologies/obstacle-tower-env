@@ -10,6 +10,7 @@ import time
 from collections import deque
 from gym import error, spaces
 from mlagents_envs.environment import UnityEnvironment
+from mlagents_envs.registry import UnityEnvRegistry
 from mlagents_envs.side_channel.environment_parameters_channel import (
     EnvironmentParametersChannel,
 )
@@ -35,8 +36,6 @@ class ObstacleTowerEnv(gym.Env):
 
     def __init__(
         self,
-        environment_filename=None,
-        docker_training=False,
         worker_id=0,
         retro=True,
         timeout_wait=30,
@@ -58,12 +57,13 @@ class ObstacleTowerEnv(gym.Env):
         self.reset_parameters = EnvironmentParametersChannel()
         self.engine_config = EngineConfigurationChannel()
 
-        self._env = UnityEnvironment(
-            environment_filename,
-            worker_id,
+        registry = UnityEnvRegistry()
+        registry.register_from_yaml("https://storage.googleapis.com/mlagents-test-environments/1.0.0/obstacle_tower.yaml")
+
+        self._env = registry["ObstacleTower"].make(
+            worker_id=worker_id,
             timeout_wait=timeout_wait,
-            side_channels=[self.reset_parameters, self.engine_config],
-        )
+            side_channels=[self.reset_parameters, self.engine_config])
 
         if realtime_mode:
             self.engine_config.set_configuration_parameters(time_scale=1.0)
