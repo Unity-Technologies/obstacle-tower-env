@@ -11,5 +11,5 @@ setup(
     py_modules=["obstacle_tower_env"],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    install_requires=["mlagents-envs>=0.16,<0.17", "gym"],
+    install_requires=["mlagents-envs>=0.17,<0.19", "gym"],
 )
