@@ -10,6 +10,7 @@ import time
 from collections import deque
 from gym import error, spaces
 from mlagents_envs.environment import UnityEnvironment
+from mlagents_envs.registry import UnityEnvRegistry
 from mlagents_envs.side_channel.environment_parameters_channel import (
     EnvironmentParametersChannel,
 )
@@ -32,11 +33,11 @@ logger = logging.getLogger("gym_unity")
 
 class ObstacleTowerEnv(gym.Env):
     ALLOWED_VERSIONS = ["4.0?team=0"]
+    _REGISTRY_YAML = "https://storage.googleapis.com/mlagents-test-environments/1.0.0/obstacle_tower.yaml"
 
     def __init__(
         self,
         environment_filename=None,
-        docker_training=False,
         worker_id=0,
         retro=True,
         timeout_wait=30,
@@ -58,7 +59,15 @@ class ObstacleTowerEnv(gym.Env):
         self.reset_parameters = EnvironmentParametersChannel()
         self.engine_config = EngineConfigurationChannel()
 
-        self._env = UnityEnvironment(
+        if environment_filename is None:
+            registry = UnityEnvRegistry()
+            registry.register_from_yaml(self._REGISTRY_YAML)
+            self._env = registry["ObstacleTower"].make(
+                worker_id=worker_id,
+                timeout_wait=timeout_wait,
+                side_channels=[self.reset_parameters, self.engine_config])
+        else:
+            self._env = UnityEnvironment(
             environment_filename,
             worker_id,
             timeout_wait=timeout_wait,
