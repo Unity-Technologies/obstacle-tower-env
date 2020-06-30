@@ -58,10 +58,9 @@ class ObstacleTowerEnv(gym.Env):
         self.reset_parameters = EnvironmentParametersChannel()
         self.engine_config = EngineConfigurationChannel()
 
-        registry = UnityEnvRegistry()
-        registry.register_from_yaml("https://storage.googleapis.com/mlagents-test-environments/1.0.0/obstacle_tower.yaml")
-
         if environment_filename is None:
+            registry = UnityEnvRegistry()
+            registry.register_from_yaml("https://storage.googleapis.com/mlagents-test-environments/1.0.0/obstacle_tower.yaml")
             self._env = registry["ObstacleTower"].make(
                 worker_id=worker_id,
                 timeout_wait=timeout_wait,
