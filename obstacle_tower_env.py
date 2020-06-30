@@ -33,6 +33,7 @@ logger = logging.getLogger("gym_unity")
 
 class ObstacleTowerEnv(gym.Env):
     ALLOWED_VERSIONS = ["4.0?team=0"]
+    _REGISTRY_YAML = "https://storage.googleapis.com/mlagents-test-environments/1.0.0/obstacle_tower.yaml"
 
     def __init__(
         self,
@@ -60,7 +61,7 @@ class ObstacleTowerEnv(gym.Env):
 
         if environment_filename is None:
             registry = UnityEnvRegistry()
-            registry.register_from_yaml("https://storage.googleapis.com/mlagents-test-environments/1.0.0/obstacle_tower.yaml")
+            registry.register_from_yaml(self._REGISTRY_YAML)
             self._env = registry["ObstacleTower"].make(
                 worker_id=worker_id,
                 timeout_wait=timeout_wait,
