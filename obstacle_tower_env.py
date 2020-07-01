@@ -33,7 +33,7 @@ logger = logging.getLogger("gym_unity")
 
 class ObstacleTowerEnv(gym.Env):
     ALLOWED_VERSIONS = ["4.0?team=0"]
-    _REGISTRY_YAML = "https://storage.googleapis.com/mlagents-test-environments/1.0.0/obstacle_tower.yaml"
+    _REGISTRY_YAML = "https://storage.googleapis.com/obstacle-tower-build/v4.0/obstacle_tower_v4.0.yaml"
 
     def __init__(
         self,
