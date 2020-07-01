@@ -9,25 +9,42 @@ import numpy as np
 import time
 from collections import deque
 from gym import error, spaces
-from mlagents.envs.environment import UnityEnvironment
+from mlagents_envs.environment import UnityEnvironment
+from mlagents_envs.registry import UnityEnvRegistry
+from mlagents_envs.side_channel.environment_parameters_channel import (
+    EnvironmentParametersChannel,
+)
+from mlagents_envs.side_channel.engine_configuration_channel import (
+    EngineConfigurationChannel,
+)
 
 
 class UnityGymException(error.Error):
     """
     Any error related to the gym wrapper of ml-agents.
     """
+
     pass
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gym_unity")
-    
+
 
 class ObstacleTowerEnv(gym.Env):
-    ALLOWED_VERSIONS = ['3.1']
+    ALLOWED_VERSIONS = ["4.0?team=0"]
+    _REGISTRY_YAML = "https://storage.googleapis.com/obstacle-tower-build/v4.0/obstacle_tower_v4.0.yaml"
 
-    def __init__(self, environment_filename=None, docker_training=False, worker_id=0, retro=True,
-                 timeout_wait=30, realtime_mode=False, config=None, greyscale=False):
+    def __init__(
+        self,
+        environment_filename=None,
+        worker_id=0,
+        retro=True,
+        timeout_wait=30,
+        realtime_mode=False,
+        config=None,
+        greyscale=False,
+    ):
         """
         Arguments:
           environment_filename: The file path to the Unity executable.  Does not require the extension.
@@ -39,13 +56,32 @@ class ObstacleTowerEnv(gym.Env):
           timeout_wait: Time for python interface to wait for environment to connect.
           realtime_mode: Whether to render the environment window image and run environment at realtime.
         """
-        self._env = UnityEnvironment(environment_filename,
-                                     worker_id,
-                                     docker_training=docker_training,
-                                     timeout_wait=timeout_wait)
+        self.reset_parameters = EnvironmentParametersChannel()
+        self.engine_config = EngineConfigurationChannel()
 
-        split_name = self._env.academy_name.split('-v')
-        if len(split_name) == 2 and split_name[0] == "ObstacleTower":
+        if environment_filename is None:
+            registry = UnityEnvRegistry()
+            registry.register_from_yaml(self._REGISTRY_YAML)
+            self._env = registry["ObstacleTower"].make(
+                worker_id=worker_id,
+                timeout_wait=timeout_wait,
+                side_channels=[self.reset_parameters, self.engine_config])
+        else:
+            self._env = UnityEnvironment(
+            environment_filename,
+            worker_id,
+            timeout_wait=timeout_wait,
+            side_channels=[self.reset_parameters, self.engine_config],
+        )
+
+        if realtime_mode:
+            self.engine_config.set_configuration_parameters(time_scale=1.0)
+        else:
+            self.engine_config.set_configuration_parameters(time_scale=20.0)
+        self._env.reset()
+        behavior_name = list(self._env.behavior_specs)[0]
+        split_name = behavior_name.split("-v")
+        if len(split_name) == 2 and split_name[0] == "ObstacleTowerAgent":
             self.name, self.version = split_name
         else:
             raise UnityGymException(
@@ -54,9 +90,10 @@ class ObstacleTowerEnv(gym.Env):
 
         if self.version not in self.ALLOWED_VERSIONS:
             raise UnityGymException(
-                "Invalid Obstacle Tower version.  Your build is v" + self.version +
-                " but only the following versions are compatible with this gym: " +
-                str(self.ALLOWED_VERSIONS)
+                "Invalid Obstacle Tower version.  Your build is v"
+                + self.version
+                + " but only the following versions are compatible with this gym: "
+                + str(self.ALLOWED_VERSIONS)
             )
 
         self.visual_obs = None
@@ -80,39 +117,33 @@ class ObstacleTowerEnv(gym.Env):
         flatten_branched = self.retro
         uint8_visual = self.retro
 
-        # Check brain configuration
-        if len(self._env.brains) != 1:
+        # Check behavior configuration
+        if len(self._env.behavior_specs) != 1:
             raise UnityGymException(
-                "There can only be one brain in a UnityEnvironment "
-                "if it is wrapped in a gym.")
-        self.brain_name = self._env.external_brain_names[0]
-        brain = self._env.brains[self.brain_name]
+                "There can only be one agent in this environment "
+                "if it is wrapped in a gym."
+            )
+        self.behavior_name = behavior_name
+        behavior_spec = self._env.behavior_specs[behavior_name]
 
-        if brain.number_visual_observations == 0:
-            raise UnityGymException("Environment provides no visual observations.")
+        if len(behavior_spec) < 2:
+            raise UnityGymException("Environment provides too few observations.")
 
         self.uint8_visual = uint8_visual
 
-        if brain.number_visual_observations > 1:
-            logger.warning("The environment contains more than one visual observation. "
-                           "Please note that only the first will be provided in the observation.")
-
         # Check for number of agents in scene.
-        initial_info = self._env.reset(train_mode=not self.realtime_mode)[self.brain_name]
-        self._check_agents(len(initial_info.agents))
+        initial_info, terminal_info = self._env.get_steps(behavior_name)
+        self._check_agents(len(initial_info))
 
         # Set observation and action spaces
-        if len(brain.vector_action_space_size) == 1:
-            self._action_space = spaces.Discrete(brain.vector_action_space_size[0])
+        if len(behavior_spec.action_shape) == 1:
+            self._action_space = spaces.Discrete(behavior_spec.action_shape[0])
         else:
             if flatten_branched:
-                self._flattener = ActionFlattener(brain.vector_action_space_size)
+                self._flattener = ActionFlattener(behavior_spec.action_shape)
                 self._action_space = self._flattener.action_space
             else:
-                self._action_space = spaces.MultiDiscrete(brain.vector_action_space_size)
-
-        high = np.array([np.inf] * brain.vector_observation_space_size)
-        self.action_meanings = brain.vector_action_descriptions
+                self._action_space = spaces.MultiDiscrete(behavior_spec.action_shape)
 
         if self._greyscale:
             depth = 1
@@ -120,8 +151,8 @@ class ObstacleTowerEnv(gym.Env):
             depth = 3
         image_space_max = 1.0
         image_space_dtype = np.float32
-        camera_height = brain.camera_resolutions[0]["height"]
-        camera_width = brain.camera_resolutions[0]["width"]
+        camera_height = behavior_spec.observation_shapes[0][0]
+        camera_width = behavior_spec.observation_shapes[0][1]
         if self.retro:
             image_space_max = 255
             image_space_dtype = np.uint8
@@ -129,16 +160,19 @@ class ObstacleTowerEnv(gym.Env):
             camera_width = 84
 
         image_space = spaces.Box(
-            0, image_space_max,
+            0,
+            image_space_max,
             dtype=image_space_dtype,
-            shape=(camera_height, camera_width, depth)
+            shape=(camera_height, camera_width, depth),
         )
         if self.retro:
             self._observation_space = image_space
         else:
             max_float = np.finfo(np.float32).max
             keys_space = spaces.Discrete(5)
-            time_remaining_space = spaces.Box(low=0.0, high=max_float, shape=(1,), dtype=np.float32)
+            time_remaining_space = spaces.Box(
+                low=0.0, high=max_float, shape=(1,), dtype=np.float32
+            )
             floor_space = spaces.Discrete(9999)
             self._observation_space = spaces.Tuple(
                 (image_space, keys_space, time_remaining_space, floor_space)
@@ -157,18 +191,20 @@ class ObstacleTowerEnv(gym.Env):
         else:
             reset_params = config
         if self._floor is not None:
-            reset_params['starting-floor'] = self._floor
+            reset_params["starting-floor"] = self._floor
         if self._seed is not None:
-            reset_params['tower-seed'] = self._seed
+            reset_params["tower-seed"] = self._seed
 
-        self.reset_params = self._env.reset_parameters
-        info = self._env.reset(config=reset_params,
-                               train_mode=not self.realtime_mode)[self.brain_name]
-        n_agents = len(info.agents)
+        for key, value in reset_params.items():
+            self.reset_parameters.set_float_parameter(key, value)
+        self.reset_params = None
+        self._env.reset()
+        info, terminal_info = self._env.get_steps(self.behavior_name)
+        n_agents = len(info)
         self._check_agents(n_agents)
         self.game_over = False
 
-        obs, reward, done, info = self._single_step(info)
+        obs, reward, done, info = self._single_step(info, terminal_info)
         return obs
 
     def step(self, action):
@@ -189,28 +225,38 @@ class ObstacleTowerEnv(gym.Env):
         # Use random actions for all other agents in environment.
         if self._flattener is not None:
             # Translate action into list
-            action = self._flattener.lookup_action(action)
+            action = np.array(self._flattener.lookup_action(action))
 
-        info = self._env.step(action)[self.brain_name]
-        n_agents = len(info.agents)
+        self._env.set_actions(self.behavior_name, action.reshape([1, -1]))
+        self._env.step()
+        info, terminal_info = self._env.get_steps(self.behavior_name)
+        n_agents = len(info)
         self._check_agents(n_agents)
         self._current_state = info
 
-        obs, reward, done, info = self._single_step(info)
+        obs, reward, done, info = self._single_step(info, terminal_info)
         self.game_over = done
 
         return obs, reward, done, info
 
-    def _single_step(self, info):
-        self.visual_obs = self._preprocess_single(info.visual_observations[0][0][:, :, :])
+    def _single_step(self, info, terminal_info):
+        if len(terminal_info) == 0:
+            done = False
+            use_info = info
+        else:
+            done = True
+            use_info = terminal_info
+        self.visual_obs = self._preprocess_single(use_info.obs[0][0][:, :, :])
 
         self.visual_obs, keys, time, current_floor = self._prepare_tuple_observation(
-            self.visual_obs, info.vector_observations[0])
+            self.visual_obs, use_info.obs[1][0]
+        )
 
         if self.retro:
             self.visual_obs = self._resize_observation(self.visual_obs)
             self.visual_obs = self._add_stats_to_image(
-                self.visual_obs, info.vector_observations[0])
+                self.visual_obs, use_info.obs[1][0]
+            )
             default_observation = self.visual_obs
         else:
             default_observation = self.visual_obs, keys, time, current_floor
@@ -218,16 +264,23 @@ class ObstacleTowerEnv(gym.Env):
         if self._greyscale:
             default_observation = self._greyscale_obs(default_observation)
 
-        return default_observation, info.rewards[0], info.local_done[0], {
-            "text_observation": info.text_observations[0],
-            "brain_info": info,
-            "total_keys": keys,
-            "time_remaining": time,
-            "current_floor": current_floor
-        }
+        return (
+            default_observation,
+            use_info.reward[0],
+            done,
+            {
+                "text_observation": None,
+                "brain_info": use_info,
+                "total_keys": keys,
+                "time_remaining": time,
+                "current_floor": current_floor,
+            },
+        )
 
     def _greyscale_obs(self, obs):
-        new_obs = np.floor(np.expand_dims(np.mean(obs, axis=2), axis=2)).astype(np.uint8)
+        new_obs = np.floor(np.expand_dims(np.mean(obs, axis=2), axis=2)).astype(
+            np.uint8
+        )
         return new_obs
 
     def _preprocess_single(self, single_visual_obs):
@@ -236,7 +289,7 @@ class ObstacleTowerEnv(gym.Env):
         else:
             return single_visual_obs
 
-    def render(self, mode='rgb_array'):
+    def render(self, mode="rgb_array"):
         return self.visual_obs
 
     def close(self):
@@ -245,9 +298,6 @@ class ObstacleTowerEnv(gym.Env):
         garbage collected or when the program exits.
         """
         self._env.close()
-
-    def get_action_meanings(self):
-        return self.action_meanings
 
     def seed(self, seed=None):
         """Sets a fixed seed for this env's random number generator(s).
@@ -280,7 +330,9 @@ class ObstacleTowerEnv(gym.Env):
                 "Starting floor outside of valid range [0, 99]. Floor 0 will be used"
                 "on next reset."
             )
-        logger.warning("New starting floor " + str(floor) + " will apply on next reset.")
+        logger.warning(
+            "New starting floor " + str(floor) + " will apply on next reset."
+        )
         self._floor = floor
 
     @staticmethod
@@ -318,28 +370,31 @@ class ObstacleTowerEnv(gym.Env):
             start = int(i * 16.8) + 4
             end = start + 10
             vis_obs[1:5, start:end, 0:2] = 255
-        vis_obs[6:10, 0:int(time_num * 84), 1] = 255
+        vis_obs[6:10, 0 : int(time_num * 84), 1] = 255
         return vis_obs
 
     def _check_agents(self, n_agents):
         if n_agents > 1:
             raise UnityGymException(
                 "The environment was launched as a single-agent environment, however"
-                "there is more than one agent in the scene.")
+                "there is more than one agent in the scene."
+            )
         if self._n_agents is None:
             self._n_agents = n_agents
             logger.info("{} agents within environment.".format(n_agents))
         elif self._n_agents != n_agents:
-            raise UnityGymException("The number of agents in the environment has changed since "
-                                    "initialization. This is not supported.")
+            raise UnityGymException(
+                "The number of agents in the environment has changed since "
+                "initialization. This is not supported."
+            )
 
     @property
     def metadata(self):
-        return {'render.modes': ['rgb_array']}
+        return {"render.modes": ["rgb_array"]}
 
     @property
     def reward_range(self):
-        return -float('inf'), float('inf')
+        return -float("inf"), float("inf")
 
     @property
     def spec(self):
@@ -358,7 +413,7 @@ class ObstacleTowerEnv(gym.Env):
         return self._n_agents
 
 
-class ActionFlattener():
+class ActionFlattener:
     """
     Flattens branched discrete action spaces into single-branch discrete action spaces.
     """
@@ -383,7 +438,9 @@ class ActionFlattener():
         possible_vals = [range(_num) for _num in branched_action_space]
         all_actions = [list(_action) for _action in itertools.product(*possible_vals)]
         # Dict should be faster than List for large action spaces
-        action_lookup = {_scalar: _action for (_scalar, _action) in enumerate(all_actions)}
+        action_lookup = {
+            _scalar: _action for (_scalar, _action) in enumerate(all_actions)
+        }
         return action_lookup
 
     def lookup_action(self, action):
@@ -414,12 +471,12 @@ class EpisodeResults:
 
     def as_dict(self):
         return {
-            'seed': self.seed,
-            'time_elapsed': self.time_elapsed,
-            'episode_reward': self.reward,
-            'max_floor_reached': self.max_floor_reached,
-            'total_steps': self.total_steps,
-            'reset_params': self.reset_params
+            "seed": self.seed,
+            "time_elapsed": self.time_elapsed,
+            "episode_reward": self.reward,
+            "max_floor_reached": self.max_floor_reached,
+            "total_steps": self.total_steps,
+            "reset_params": self.reset_params,
         }
 
 
@@ -459,8 +516,7 @@ class ObstacleTowerEvaluation(gym.Wrapper):
         self.episodic_steps = 0
         self.current_floor = 0
         self.episode_results[self.current_seed] = EpisodeResults(
-            self.current_seed,
-            self.env.reset_params
+            self.current_seed, self.env.reset_params
         )
         return obs
 
@@ -471,13 +527,12 @@ class ObstacleTowerEvaluation(gym.Wrapper):
         observation, reward, done, info = self.env.step(action)
         self.episodic_return += reward
         self.episodic_steps += 1
-        if info['current_floor'] > self.current_floor:
-            self.current_floor = info['current_floor']
+        if info["current_floor"] > self.current_floor:
+            self.current_floor = info["current_floor"]
         if done:
             self.episode_results[self.current_seed].complete(
-                self.episodic_return,
-                self.current_floor,
-                self.episodic_steps)
+                self.episodic_return, self.current_floor, self.episodic_steps
+            )
             if len(self.seeds) > 0:
                 self.current_seed = self.seeds.popleft()
                 self.env.seed(self.current_seed)
@@ -505,9 +560,11 @@ class ObstacleTowerEvaluation(gym.Wrapper):
             total_floors += result.max_floor_reached
             total_steps += result.total_steps
         return {
-            'average_reward': total_reward / num_episodes,
-            'average_floor_reached': total_floors / num_episodes,
-            'average_episode_steps': total_steps / num_episodes,
-            'episode_count': num_episodes,
-            'episodes': list(map(lambda es: es.as_dict(), self.episode_results.values()))
+            "average_reward": total_reward / num_episodes,
+            "average_floor_reached": total_floors / num_episodes,
+            "average_episode_steps": total_steps / num_episodes,
+            "episode_count": num_episodes,
+            "episodes": list(
+                map(lambda es: es.as_dict(), self.episode_results.values())
+            ),
         }

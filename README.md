@@ -44,6 +44,10 @@ To learn more, please read our AAAI Workshop paper:
    * Added evaluation script for benchmarking, along with official benchmarking guidelines.
 * v3.1 Minor release.
    * Updates Unity project to 2019.2 and ML-Agents version to 0.10.
+* 4.0 Major project updates
+   * Unity project updated to 2019.4 LTS.
+   * ML-Agents package updated to 1.1.0 (Release 3).
+   * Gym wrapper now uses registry by default to auto-download binary.
   
 
 ## Installation
@@ -54,19 +58,21 @@ The Obstacle Tower environment runs on Mac OS X, Windows, or Linux.
 
 Python dependencies (also in [setup.py](https://github.com/Unity-Technologies/obstacle-tower-env/blob/master/setup.py)):
 
-* Python 3.6
-* Unity ML-Agents v0.10
+* Python 3.6+
+* Unity ML-Agents 1.x
 * OpenAI Gym
 
-### Download the environment
+### Download the environment (optional)
+
+By default, the binary will be automatically downloaded when the Obstacle Tower gym is first instantiated. The binaries for each platform can be separately downloaded at the following links.
 
 | *Platform*     | *Download Link*                                                                     |
 | --- | --- |
-| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v3.1/obstacletower_v3.1_linux.zip   |
-| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v3.1/obstacletower_v3.1_osx.zip     |
-| Windows        | https://storage.googleapis.com/obstacle-tower-build/v3.1/obstacletower_v3.1_windows.zip |
+| Linux (x86_64) | https://storage.googleapis.com/obstacle-tower-build/v4.0/obstacletower_v4.0_linux.zip   |
+| Mac OS X       | https://storage.googleapis.com/obstacle-tower-build/v4.0/obstacletower_v4.0_osx.zip     |
+| Windows        | https://storage.googleapis.com/obstacle-tower-build/v4.0/obstacletower_v4.0_windows.zip |
 
-For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v3.1/ote-v3.1-checksums.txt).
+For checksums on these files, see [here](https://storage.googleapis.com/obstacle-tower-build/v4.0/ote-v4.0-checksums.txt).
 
 ### Install the Gym interface
 
