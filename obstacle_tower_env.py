@@ -32,8 +32,8 @@ logger = logging.getLogger("gym_unity")
 
 
 class ObstacleTowerEnv(gym.Env):
-    ALLOWED_VERSIONS = ["4.0?team=0"]
-    _REGISTRY_YAML = "https://storage.googleapis.com/obstacle-tower-build/v4.0/obstacle_tower_v4.0.yaml"
+    ALLOWED_VERSIONS = ["4.1?team=0"]
+    _REGISTRY_YAML = "https://storage.googleapis.com/obstacle-tower-build/v4.1/obstacle_tower_v4.1.yaml"
 
     def __init__(
         self,
@@ -76,8 +76,10 @@ class ObstacleTowerEnv(gym.Env):
 
         if realtime_mode:
             self.engine_config.set_configuration_parameters(time_scale=1.0)
+            self.reset_parameters.set_float_parameter("train-mode", 0.0)
         else:
             self.engine_config.set_configuration_parameters(time_scale=20.0)
+            self.reset_parameters.set_float_parameter("train-mode", 1.0)
         self._env.reset()
         behavior_name = list(self._env.behavior_specs)[0]
         split_name = behavior_name.split("-v")
@@ -97,7 +99,6 @@ class ObstacleTowerEnv(gym.Env):
             )
 
         self.visual_obs = None
-        self._current_state = None
         self._n_agents = None
         self._flattener = None
         self._greyscale = greyscale
@@ -229,13 +230,16 @@ class ObstacleTowerEnv(gym.Env):
 
         self._env.set_actions(self.behavior_name, action.reshape([1, -1]))
         self._env.step()
-        info, terminal_info = self._env.get_steps(self.behavior_name)
-        n_agents = len(info)
-        self._check_agents(n_agents)
-        self._current_state = info
-
-        obs, reward, done, info = self._single_step(info, terminal_info)
+        running_info, terminal_info = self._env.get_steps(self.behavior_name)
+        obs, reward, done, info = self._single_step(running_info, terminal_info)
         self.game_over = done
+
+        # Verify that not more than one agent is present inside the environment
+        if done:
+            n_agents = len(terminal_info)
+        else:
+            n_agents = len(running_info)
+        self._check_agents(n_agents)
 
         return obs, reward, done, info
 
